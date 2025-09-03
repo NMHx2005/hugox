@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Box, IconButton, Typography } from '@mui/material';
+import { AppBar, Toolbar, Box, IconButton } from '@mui/material';
 import { Search as SearchIcon, Menu as MenuIcon } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import TrendingBar from '../client/Home/TrendingBar';
@@ -62,37 +62,14 @@ const Header: React.FC = () => {
                 <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
                     {/* Logo */}
                     <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'inherit' }}>
-                        <Box
-                            sx={{
-                                width: 24,
-                                height: 24,
-                                backgroundColor: '#f58220',
-                                borderRadius: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                '&::before': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    width: 8,
-                                    height: 8,
-                                    backgroundColor: '#fff',
-                                    borderRadius: '50%'
-                                }
-                            }}
-                        />
-                        <Typography
-                            sx={{
-                                fontFamily: 'Orbitron, sans-serif',
-                                fontWeight: 700,
-                                fontSize: '18px',
-                                letterSpacing: '0.1em',
-                                color: '#000'
-                            }}
-                        >
-                            LUMIAS
-                        </Typography>
+                        <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'inherit' }}>
+                            <Box
+                                component="img"
+                                src="/logo.jpg"
+                                alt="Lumias logo"
+                                sx={{ width: 200, height: 70 }}
+                            />
+                        </Box>
                     </Box>
 
                     {/* Right Icons */}
