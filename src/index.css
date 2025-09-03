@@ -1,0 +1,29 @@
+/* Import Global Styles */
+@import './styles/global.css';
+
+/* Override default Vite styles for Lumias theme */
+:root {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color: #000;
+  background-color: #f0f0f0;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  /* background-color: #f0f0f0; */
+}
+
+/* Reset button styles to use our custom styles */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+
+.product-section, .about-section {
+  padding: 60px 0;
+}
