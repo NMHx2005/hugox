@@ -289,7 +289,7 @@ const Footer: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
                         <LocationOn sx={{ marginRight: 1, fontSize: '16px' }} />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Địa chỉ: Tầng 2, Số 33A, Ngõ 41 Thái Hà, P. Đống Đa, Hà Nội
+                            Địa chỉ: 27 Đoàn Thị Điểm - Phường Sông Cầu - Dăk Lăk
                         </Typography>
                     </Box>
 
