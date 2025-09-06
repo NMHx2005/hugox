@@ -41,6 +41,7 @@ const ContactBar: React.FC = () => {
                         backgroundColor: '#f5f5f5'
                     }
                 }}
+                onClick={() => window.open('tel:0878784842', '_self')}
             >
                 <Phone sx={{ fontSize: { xs: '16px', sm: '18px', md: '20px' }, color: '#f58220' }} />
                 <Typography sx={{ fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit' }}>
@@ -65,6 +66,7 @@ const ContactBar: React.FC = () => {
                         backgroundColor: '#f5f5f5'
                     }
                 }}
+                onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
             >
                 <Box
                     component="img"

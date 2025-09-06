@@ -282,7 +282,7 @@ const Footer: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ margin: '0 0 16px 0', lineHeight: 1.5, color: '#fff' }}>
-                        LUMIAS – Thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh,
+                        HUGOX – Thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh,
                         không dây và không giới hạn.
                     </Typography>
 
@@ -296,28 +296,38 @@ const Footer: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
                         <Phone sx={{ marginRight: 1, fontSize: '16px' }} />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Liên hệ mua hàng: 0966.061.170
+                            Hotline mua hàng: 08.7878.4842
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
-                        <Phone sx={{ marginRight: 1, fontSize: '16px' }} />
+                        <Box
+                            component="img"
+                            src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
+                            alt="Zalo app icon"
+                            sx={{ width: 16, height: 16, marginRight: 1 }}
+                        />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Liên hệ làm đại lý: 0966.933.737
+                            Zalo mua hàng: 08.7878.4842
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
-                        <Phone sx={{ marginRight: 1, fontSize: '16px' }} />
+                        <Box
+                            component="img"
+                            src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
+                            alt="Zalo app icon"
+                            sx={{ width: 16, height: 16, marginRight: 1 }}
+                        />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Liên hệ kỹ thuật, bảo hành: 1900.633.870
+                            Zalo bảo hành: 0876.83.63.43
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', color: '#fff' }}>
                         <Email sx={{ marginRight: 1, fontSize: '16px' }} />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Email: info@lumias.vn
+                            Email: Hugodigital2003@gmail.com
                         </Typography>
                     </Box>
                 </Box>
@@ -351,6 +361,7 @@ const Footer: React.FC = () => {
                         cursor: 'pointer',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
+                    onClick={() => window.open('tel:0878784842', '_self')}
                 >
                     <Phone sx={{ fontSize: '24px', marginBottom: 0.5, color: '#f58220' }} />
                     <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#000' }}>
@@ -368,6 +379,7 @@ const Footer: React.FC = () => {
                         cursor: 'pointer',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
+                    onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
                 >
                     <Box
                         component="img"
