@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, Tabs, Tab, Card, CardMedia, CardContent, Rating } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { getProductsByCategory } from '../../../data/mockProducts';
+import type { Product as MockProduct } from '../../../data/mockProducts';
 // import { ArrowUpward } from '@mui/icons-material';
 
 interface Product {
@@ -17,87 +20,32 @@ const ProductSection: React.FC = () => {
     const [activeTab, setActiveTab] = useState(0);
 
     const categories = [
-        'Thiết bị nhà bếp',
-        'Quạt',
-        'Điện gia dụng',
-        'Máy hút ẩm',
-        'Sức khoẻ & Làm đẹp'
+        { name: 'Thiết bị nhà bếp', slug: 'may-xay-sinh-to-cong-nghiep' },
+        { name: 'Quạt', slug: 'fans' },
+        { name: 'Điện gia dụng', slug: 'appliances' },
+        { name: 'Máy hút ẩm', slug: 'dehumidifier' },
+        { name: 'Sức khoẻ & Làm đẹp', slug: 'health-beauty' }
     ];
 
-    const products: Product[] = [
-        {
-            id: 1,
-            name: 'Máy làm sữa hạt 1.2L Lumias M120',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 1190000,
-            salePrice: 849000,
-            rating: 4.8,
-            sold: 498
-        },
-        {
-            id: 2,
-            name: 'Máy xay sinh tố mini Lumias M200',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 890000,
-            salePrice: 599000,
-            rating: 4.7,
-            sold: 324
-        },
-        {
-            id: 3,
-            name: 'Nồi lẩu điện đa năng Lumias LM-PM605 1.5L',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            salePrice: 490000,
-            rating: 4.9,
-            sold: 756,
-            isFromPrice: true
-        },
-        {
-            id: 4,
-            name: 'Nồi nhôm hợp kim Lumias AL-800',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 750000,
-            salePrice: 520000,
-            rating: 4.6,
-            sold: 189
-        },
-        {
-            id: 5,
-            name: 'Bếp từ đơn Lumias IH-1000',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 1200000,
-            salePrice: 899000,
-            rating: 4.8,
-            sold: 267
-        },
-        {
-            id: 6,
-            name: 'Máy ép chậm Lumias SJ-300',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 1500000,
-            salePrice: 1099000,
-            rating: 4.9,
-            sold: 445
-        },
-        {
-            id: 7,
-            name: 'Ấm đun nước điện Lumias K-1500',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 650000,
-            salePrice: 450000,
-            rating: 4.7,
-            sold: 312
-        },
-        {
-            id: 8,
-            name: 'Máy làm bánh mì Lumias BM-500',
-            image: 'https://lumias.vn/wp-content/uploads/2024/12/may-lam-sua-hat-1-2l-lumias-m12o-405x405.jpg',
-            originalPrice: 1800000,
-            salePrice: 1299000,
-            rating: 4.8,
-            sold: 156
-        }
-    ];
+    // Lấy sản phẩm theo danh mục hiện tại
+    const getCurrentProducts = (): Product[] => {
+        const categorySlug = categories[activeTab].slug;
+        const categoryProducts = getProductsByCategory(categorySlug);
+
+        // Chuyển đổi format từ mockProducts sang format của ProductSection
+        return categoryProducts.slice(0, 8).map((product: MockProduct) => ({
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            originalPrice: product.priceOriginal ? parseInt(product.priceOriginal.replace(/\./g, '')) : undefined,
+            salePrice: parseInt(product.priceCurrent.replace(/\./g, '')),
+            rating: product.rating,
+            sold: product.sold,
+            isFromPrice: false
+        }));
+    };
+
+    const products = getCurrentProducts();
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
@@ -157,6 +105,8 @@ const ProductSection: React.FC = () => {
                         </Typography>
 
                         <Button
+                            component={Link}
+                            to="/products"
                             variant="contained"
                             sx={{
                                 backgroundColor: '#000',
@@ -166,6 +116,7 @@ const ProductSection: React.FC = () => {
                                 padding: { xs: '10px 20px', sm: '12px 24px' },
                                 borderRadius: '4px',
                                 textTransform: 'none',
+                                textDecoration: 'none',
                                 '&:hover': {
                                     backgroundColor: '#333'
                                 },
@@ -217,7 +168,7 @@ const ProductSection: React.FC = () => {
                                 }}
                             >
                                 {categories.map((category, index) => (
-                                    <Tab key={index} label={category} />
+                                    <Tab key={index} label={category.name} />
                                 ))}
                             </Tabs>
                         </Box>
@@ -237,11 +188,15 @@ const ProductSection: React.FC = () => {
                             {products.map((product) => (
                                 <Card
                                     key={product.id}
+                                    component={Link}
+                                    to={`/products/${product.id}`}
                                     sx={{
                                         backgroundColor: '#fff',
                                         borderRadius: '12px',
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                         transition: 'transform 0.2s, box-shadow 0.2s',
+                                        textDecoration: 'none',
+                                        color: 'inherit',
                                         '&:hover': {
                                             transform: 'translateY(-4px)',
                                             boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
