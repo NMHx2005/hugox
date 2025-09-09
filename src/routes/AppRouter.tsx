@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Client Pages
 import {
     HomePage,
+    FeaturedPage,
     AboutPage,
     CategoriesPage,
     ProductsPage,
@@ -11,17 +12,14 @@ import {
     NewsPage,
     NewsDetailPage,
     ReviewsPage,
+    ReviewDetailPage,
     ContactPage,
     CartPage,
     CheckoutPage,
     LoginPage,
     RegisterPage,
     ProfilePage,
-    AppliancesPage,
-    KitchenPage,
-    FansPage,
-    DehumidifierPage,
-    HealthBeautyPage,
+    DynamicCategoryPage,
 } from '../pages/client';
 
 // Admin Pages
@@ -46,6 +44,7 @@ import {
     PaymentSettingsPage,
 } from '../pages/admin';
 
+
 const AppRouter: React.FC = () => {
     return (
         <Router>
@@ -53,12 +52,14 @@ const AppRouter: React.FC = () => {
                 {/* Client Routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/featured" element={<FeaturedPage />} />
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:id" element={<ProductDetailPage />} />
                 <Route path="/news" element={<NewsPage />} />
                 <Route path="/news/:id" element={<NewsDetailPage />} />
                 <Route path="/reviews" element={<ReviewsPage />} />
+                <Route path="/reviews/:id" element={<ReviewDetailPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
@@ -66,12 +67,8 @@ const AppRouter: React.FC = () => {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
 
-                {/* Category Routes */}
-                <Route path="/categories/appliances" element={<AppliancesPage />} />
-                <Route path="/categories/kitchen" element={<KitchenPage />} />
-                <Route path="/categories/fans" element={<FansPage />} />
-                <Route path="/categories/dehumidifier" element={<DehumidifierPage />} />
-                <Route path="/categories/health-beauty" element={<HealthBeautyPage />} />
+                {/* Dynamic Category Routes */}
+                <Route path="/categories/:categorySlug" element={<DynamicCategoryPage />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLoginPage />} />

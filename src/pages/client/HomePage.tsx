@@ -5,7 +5,7 @@ import ProductSection from '../../components/client/Home/ProductSection';
 import AboutSection from '../../components/client/Home/AboutSection';
 import CategoryExploreSection from '../../components/client/Home/CategoryExploreSection';
 import PressSection from '../../components/client/Home/PressSection';
-import PartnersAwardsSection from '../../components/client/Home/PartnersAwardsSection';
+// import PartnersAwardsSection from '../../components/client/Home/PartnersAwardsSection';
 import KOLReviewsSection from '../../components/client/Home/KOLReviewsSection';
 
 const HomePage: React.FC = () => {
@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
             <ProductSection />
             <AboutSection />
             <CategoryExploreSection />
-            <PartnersAwardsSection />
+            {/* <PartnersAwardsSection /> */}
             <PressSection />
             <KOLReviewsSection />
             {/* Featured Products */}

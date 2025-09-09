@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <Box sx={{ minHeight: '100vh', backgroundColor: '#f0f0f0', display: 'flex', flexDirection: 'column' }}>
             <Header />
-            <Box component="main" sx={{ flex: 1, width: '100%', paddingBottom: { xs: '80px', md: '0' } }}>
+            <Box component="main" sx={{ flex: 1, width: '100%', paddingTop: { xs: '100px', md: '120px' }, paddingBottom: { xs: '80px', md: '0' } }}>
                 {children}
             </Box>
             <Footer />

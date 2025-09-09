@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// In Vite, environment variables are exposed via import.meta.env
+const baseURL = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_API_URL)
+    ? (import.meta as any).env.VITE_API_URL
+    : 'http://localhost:8000';
+
 const api = axios.create({
-    baseURL: process.env.VITE_API_URL || 'http://localhost:8000',
+    baseURL,
     timeout: 10000,
 });
 
