@@ -11,8 +11,7 @@ import {
     Rating,
     TextField,
     InputAdornment,
-    Avatar,
-    Divider
+    Avatar
 } from '@mui/material';
 import {
     Star as StarIcon,
@@ -26,6 +25,7 @@ import Layout from '../../components/shared/Layout';
 
 const ReviewDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    console.log(id);
     const [searchQuery, setSearchQuery] = useState('');
 
     // Mock data for review details
