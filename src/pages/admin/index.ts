@@ -11,10 +11,6 @@ export { default as ProductEditPage } from './products/ProductEditPage';
 export { default as CategoryListPage } from './categories/CategoryListPage';
 export { default as CategoryFormPage } from './categories/CategoryFormPage';
 
-// Order Management
-export { default as OrderListPage } from './orders/OrderListPage';
-export { default as OrderDetailPage } from './orders/OrderDetailPage';
-
 // Customer Management
 export { default as CustomerListPage } from './customers/CustomerListPage';
 export { default as CustomerDetailPage } from './customers/CustomerDetailPage';
@@ -22,9 +18,6 @@ export { default as CustomerDetailPage } from './customers/CustomerDetailPage';
 // News Management
 export { default as NewsListPage } from './news/NewsListPage';
 export { default as NewsFormPage } from './news/NewsFormPage';
-
-// Review Management
-export { default as ReviewListPage } from './reviews/ReviewListPage';
 
 // User Management
 export { default as UserListPage } from './users/UserListPage';

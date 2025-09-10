@@ -87,7 +87,7 @@ const MobileBottomBar: React.FC = () => {
                 >
                     <Box
                         component="img"
-                        src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
+                        src="/zalo_logo.jpg"
                         alt="Zalo"
                         sx={{ width: 20, height: 20 }}
                     />

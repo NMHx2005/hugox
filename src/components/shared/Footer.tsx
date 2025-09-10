@@ -1,13 +1,12 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import {
-    Facebook,
-    YouTube,
     Phone,
     LocationOn,
     Email,
-    ArrowUpward
+    ArrowUpward,
 } from '@mui/icons-material';
+
 
 const Footer: React.FC = () => {
     const scrollToTop = () => {
@@ -45,7 +44,8 @@ const Footer: React.FC = () => {
                 background: 'linear-gradient(0deg, #2b2c2b 0%, #000000 100%)',
                 color: '#fff',
                 position: 'relative',
-                paddingTop: "40px"
+                paddingTop: "40px",
+                marginBottom: { xs: '90px', md: '0' }
             }}
         >
             {/* Main Footer Content */}
@@ -88,10 +88,6 @@ const Footer: React.FC = () => {
                         </Typography>
                     </Box>
 
-                    {/* Description */}
-                    <Typography sx={{ fontSize: '14px', marginBottom: 2.5, color: '#fff' }}>
-                        Website cùng công ty
-                    </Typography>
 
                     {/* Brand Logos */}
                     {/* <Box
@@ -114,7 +110,7 @@ const Footer: React.FC = () => {
                     </Box> */}
 
                     {/* Social Media */}
-                    <Box
+                    {/* <Box
                         sx={{
                             display: 'flex',
                             gap: 2.5,
@@ -135,13 +131,13 @@ const Footer: React.FC = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: '#fff' }}>
                             <Box
                                 component="img"
-                                src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
+                                src="/zalo.jpg"
                                 alt="Zalo app icon"
                                 sx={{ width: 18, height: 18 }}
                             />
                             <Typography sx={{ fontSize: '14px', color: '#fff' }}>Zalo mua hàng</Typography>
                         </Box>
-                    </Box>
+                    </Box> */}
 
                     {/* Certifications */}
                     {/* <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'nowrap' }}>
@@ -275,25 +271,27 @@ const Footer: React.FC = () => {
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
+                        {/* <ZaloIcon size={16} /> */}
                         <Box
                             component="img"
-                            src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
-                            alt="Zalo app icon"
-                            sx={{ width: 16, height: 16, marginRight: 1 }}
+                            src="/zalo_logo.jpg"
+                            alt="Zalo"
+                            sx={{ width: 20, height: 20 }}
                         />
-                        <Typography sx={{ fontSize: '14px', color: '#fff' }}>
+                        <Typography sx={{ fontSize: '14px', color: '#fff', marginLeft: 1 }}>
                             Zalo mua hàng: 08.7878.4842
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
+                        {/* <ZaloIcon size={16} /> */}
                         <Box
                             component="img"
-                            src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
-                            alt="Zalo app icon"
-                            sx={{ width: 16, height: 16, marginRight: 1 }}
+                            src="/zalo_logo.jpg"
+                            alt="Zalo"
+                            sx={{ width: 20, height: 20 }}
                         />
-                        <Typography sx={{ fontSize: '14px', color: '#fff' }}>
+                        <Typography sx={{ fontSize: '14px', color: '#fff', marginLeft: 1 }}>
                             Zalo bảo hành: 0876.83.63.43
                         </Typography>
                     </Box>
@@ -333,6 +331,9 @@ const Footer: React.FC = () => {
                         borderBottom: '1px solid #ddd',
                         padding: '10px 6px',
                         cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
                     onClick={() => window.open('tel:0878784842', '_self')}
@@ -351,17 +352,20 @@ const Footer: React.FC = () => {
                         borderBottom: '1px solid #ddd',
                         padding: '10px 6px',
                         cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
                     onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
                 >
                     <Box
                         component="img"
-                        src="https://storage.googleapis.com/a1aa/image/2b869dfd-49ae-40a3-fc4e-20255c3e0e91.jpg"
-                        alt="Zalo app icon"
-                        sx={{ width: 24, height: 24, marginBottom: 0.5 }}
+                        src="zalo_logo.jpg"
+                        alt="Zalo"
+                        sx={{ width: 20, height: 20 }}
                     />
-                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#000' }}>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#000', marginTop: 0.5 }}>
                         Zalo mua
                         <br />
                         hàng
@@ -374,6 +378,9 @@ const Footer: React.FC = () => {
                     sx={{
                         padding: '10px 6px',
                         cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
                 >
@@ -397,7 +404,7 @@ const Footer: React.FC = () => {
                 }}
             >
                 <Typography sx={{ fontSize: '14px', color: '#999' }}>
-                    Copyright 2025 © HugoX | HungDan
+                    Copyright 2025 © HungDan
                 </Typography>
             </Box>
         </Box>

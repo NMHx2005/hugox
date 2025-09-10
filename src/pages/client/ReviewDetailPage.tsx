@@ -138,44 +138,128 @@ const ReviewDetailPage: React.FC = () => {
 
     return (
         <Layout>
-            <Box className="container" sx={{ mt: 3 }}>
+            <Box className="container" sx={{
+                mt: { xs: 2, md: 3 },
+                px: { xs: 2, sm: 3, md: 0 }
+            }}>
                 {/* Breadcrumbs */}
-                <Breadcrumbs sx={{ mb: 3 }}>
-                    <MuiLink component={Link} to="/" color="inherit">
+                <Breadcrumbs sx={{
+                    mb: { xs: 2, md: 3 },
+                    '& .MuiBreadcrumbs-separator': {
+                        fontSize: { xs: '0.875rem', md: '1rem' }
+                    }
+                }}>
+                    <MuiLink
+                        component={Link}
+                        to="/"
+                        color="inherit"
+                        sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
+                    >
                         Trang chủ
                     </MuiLink>
-                    <MuiLink component={Link} to="/reviews" color="inherit">
+                    <MuiLink
+                        component={Link}
+                        to="/reviews"
+                        color="inherit"
+                        sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
+                    >
                         Reviews
                     </MuiLink>
-                    <Typography color="text.primary">{reviewData.productName}</Typography>
+                    <Typography
+                        color="text.primary"
+                        sx={{
+                            fontSize: { xs: '0.875rem', md: '1rem' },
+                            display: { xs: 'none', sm: 'block' }
+                        }}
+                    >
+                        {reviewData.productName}
+                    </Typography>
+                    <Typography
+                        color="text.primary"
+                        sx={{
+                            fontSize: '0.875rem',
+                            display: { xs: 'block', sm: 'none' },
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '200px'
+                        }}
+                    >
+                        {reviewData.productName}
+                    </Typography>
                 </Breadcrumbs>
 
                 {/* Review Summary Section */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 700 }}>
+                <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                    <Typography
+                        variant="h4"
+                        component="h1"
+                        sx={{
+                            mb: { xs: 2, md: 3 },
+                            fontWeight: 700,
+                            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
+                            lineHeight: 1.2
+                        }}
+                    >
                         {reviewData.totalReviews} đánh giá cho {reviewData.productName}
                     </Typography>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h2" sx={{ fontWeight: 700, color: '#f58220' }}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', md: 'row' },
+                        alignItems: { xs: 'stretch', md: 'center' },
+                        gap: { xs: 3, md: 3 },
+                        mb: 3
+                    }}>
+                        <Box sx={{
+                            textAlign: 'center',
+                            order: { xs: 1, md: 1 }
+                        }}>
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#f58220',
+                                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.75rem' }
+                                }}
+                            >
                                 {reviewData.averageRating}
                             </Typography>
-                            <Rating value={reviewData.averageRating} readOnly size="large" />
-                            <Typography sx={{ color: '#666', mt: 1 }}>
+                            <Rating
+                                value={reviewData.averageRating}
+                                readOnly
+                                size="large"
+                                sx={{
+                                    '& .MuiRating-icon': {
+                                        fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+                                    }
+                                }}
+                            />
+                            <Typography sx={{ color: '#666', mt: 1, fontSize: { xs: '0.875rem', md: '1rem' } }}>
                                 {reviewData.totalReviews} đánh giá
                             </Typography>
                         </Box>
 
-                        <Box sx={{ flex: 1 }}>
+                        <Box sx={{
+                            flex: 1,
+                            order: { xs: 2, md: 2 }
+                        }}>
                             {reviewData.ratingDistribution.map((item, index) => (
-                                <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                    <Typography sx={{ minWidth: 20, fontSize: 14 }}>
+                                <Box key={index} sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: { xs: 1, sm: 2 },
+                                    mb: 1
+                                }}>
+                                    <Typography sx={{
+                                        minWidth: { xs: 16, sm: 20 },
+                                        fontSize: { xs: 12, sm: 14 }
+                                    }}>
                                         {item.stars} sao
                                     </Typography>
                                     <Box sx={{
                                         flex: 1,
-                                        height: 8,
+                                        height: { xs: 6, sm: 8 },
                                         backgroundColor: '#f0f0f0',
                                         borderRadius: 4,
                                         overflow: 'hidden'
@@ -187,7 +271,11 @@ const ReviewDetailPage: React.FC = () => {
                                             transition: 'width 0.3s ease'
                                         }} />
                                     </Box>
-                                    <Typography sx={{ minWidth: 30, fontSize: 14, color: '#666' }}>
+                                    <Typography sx={{
+                                        minWidth: { xs: 25, sm: 30 },
+                                        fontSize: { xs: 12, sm: 14 },
+                                        color: '#666'
+                                    }}>
                                         {item.percentage}%
                                     </Typography>
                                 </Box>
@@ -200,8 +288,11 @@ const ReviewDetailPage: React.FC = () => {
                             sx={{
                                 backgroundColor: '#f58220',
                                 '&:hover': { backgroundColor: '#e6731a' },
-                                px: 3,
-                                py: 1.5
+                                px: { xs: 2, md: 3 },
+                                py: { xs: 1, md: 1.5 },
+                                fontSize: { xs: '0.875rem', md: '1rem' },
+                                order: { xs: 3, md: 3 },
+                                alignSelf: { xs: 'stretch', md: 'flex-start' }
                             }}
                         >
                             Thêm đánh giá
@@ -210,15 +301,33 @@ const ReviewDetailPage: React.FC = () => {
                 </Box>
 
                 {/* Customer Images Section */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            mb: 2,
+                            fontWeight: 700,
+                            fontSize: { xs: '1.125rem', md: '1.25rem' }
+                        }}
+                    >
                         Hình ảnh khách hàng
                     </Typography>
                     <Box sx={{
                         display: 'flex',
-                        gap: 2,
+                        gap: { xs: 1, sm: 2 },
                         overflowX: 'auto',
-                        pb: 1
+                        pb: 1,
+                        '&::-webkit-scrollbar': {
+                            height: 4,
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: '#f1f1f1',
+                            borderRadius: 2,
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#c1c1c1',
+                            borderRadius: 2,
+                        },
                     }}>
                         {reviewData.customerImages.map((image, index) => (
                             <Box
@@ -227,8 +336,8 @@ const ReviewDetailPage: React.FC = () => {
                                 src={image}
                                 alt={`Customer image ${index + 1}`}
                                 sx={{
-                                    width: 120,
-                                    height: 120,
+                                    width: { xs: 80, sm: 100, md: 120 },
+                                    height: { xs: 80, sm: 100, md: 120 },
                                     objectFit: 'cover',
                                     borderRadius: 2,
                                     flexShrink: 0,
@@ -266,26 +375,65 @@ const ReviewDetailPage: React.FC = () => {
                 </Box>
 
                 {/* Reviews List */}
-                <Box sx={{ mb: 4 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        justifyContent: 'space-between',
+                        alignItems: { xs: 'stretch', sm: 'center' },
+                        gap: { xs: 2, sm: 0 },
+                        mb: 3
+                    }}>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 700,
+                                fontSize: { xs: '1rem', md: '1.25rem' },
+                                textAlign: { xs: 'center', sm: 'left' }
+                            }}
+                        >
                             1-{Math.min(5, reviewData.reviews.length)} của {reviewData.totalReviews} đánh giá
                         </Typography>
-                        <Button variant="outlined" sx={{ borderRadius: 2 }}>
+                        <Button
+                            variant="outlined"
+                            sx={{
+                                borderRadius: 2,
+                                alignSelf: { xs: 'center', sm: 'flex-end' },
+                                minWidth: { xs: 'auto', sm: '120px' }
+                            }}
+                        >
                             Mới nhất
                         </Button>
                     </Box>
 
                     {reviewData.reviews.map((review) => (
                         <Card key={review.id} sx={{ mb: 3, boxShadow: 1 }}>
-                            <CardContent sx={{ p: 3 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                                    <Avatar sx={{ bgcolor: '#f58220' }}>
+                            <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: { xs: 1.5, md: 2 },
+                                    mb: 2
+                                }}>
+                                    <Avatar sx={{
+                                        bgcolor: '#f58220',
+                                        width: { xs: 32, md: 40 },
+                                        height: { xs: 32, md: 40 },
+                                        fontSize: { xs: '0.875rem', md: '1rem' }
+                                    }}>
                                         {review.user.charAt(0).toUpperCase()}
                                     </Avatar>
-                                    <Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Typography sx={{ fontWeight: 600 }}>
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            flexDirection: { xs: 'column', sm: 'row' },
+                                            alignItems: { xs: 'flex-start', sm: 'center' },
+                                            gap: { xs: 0.5, sm: 1 }
+                                        }}>
+                                            <Typography sx={{
+                                                fontWeight: 600,
+                                                fontSize: { xs: '0.875rem', md: '1rem' }
+                                            }}>
                                                 {review.user}
                                             </Typography>
                                             {review.verified && (
@@ -295,21 +443,41 @@ const ReviewDetailPage: React.FC = () => {
                                                     sx={{
                                                         backgroundColor: '#e8f5e8',
                                                         color: '#2e7d32',
-                                                        fontSize: 12
+                                                        fontSize: { xs: 10, md: 12 },
+                                                        height: { xs: 20, md: 24 }
                                                     }}
                                                 />
                                             )}
                                         </Box>
-                                        <Rating value={review.rating} readOnly size="small" />
+                                        <Rating
+                                            value={review.rating}
+                                            readOnly
+                                            size="small"
+                                            sx={{
+                                                '& .MuiRating-icon': {
+                                                    fontSize: { xs: '1rem', md: '1.25rem' }
+                                                }
+                                            }}
+                                        />
                                     </Box>
                                 </Box>
 
-                                <Typography sx={{ mb: 2, lineHeight: 1.6 }}>
+                                <Typography sx={{
+                                    mb: 2,
+                                    lineHeight: 1.6,
+                                    fontSize: { xs: '0.875rem', md: '1rem' }
+                                }}>
                                     {review.comment}
                                 </Typography>
 
                                 {review.images.length > 0 && (
-                                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        gap: { xs: 0.5, md: 1 },
+                                        mb: 2,
+                                        overflowX: 'auto',
+                                        pb: 0.5
+                                    }}>
                                         {review.images.map((image, index) => (
                                             <Box
                                                 key={index}
@@ -317,29 +485,43 @@ const ReviewDetailPage: React.FC = () => {
                                                 src={image}
                                                 alt={`Review image ${index + 1}`}
                                                 sx={{
-                                                    width: 80,
-                                                    height: 80,
+                                                    width: { xs: 60, sm: 70, md: 80 },
+                                                    height: { xs: 60, sm: 70, md: 80 },
                                                     objectFit: 'cover',
                                                     borderRadius: 1,
-                                                    cursor: 'pointer'
+                                                    cursor: 'pointer',
+                                                    flexShrink: 0
                                                 }}
                                             />
                                         ))}
                                     </Box>
                                 )}
 
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: { xs: 1, md: 2 },
+                                    flexWrap: 'wrap'
+                                }}>
                                     <Button
                                         startIcon={<ThumbUpIcon />}
                                         size="small"
-                                        sx={{ color: '#666' }}
+                                        sx={{
+                                            color: '#666',
+                                            fontSize: { xs: '0.75rem', md: '0.875rem' },
+                                            minWidth: 'auto'
+                                        }}
                                     >
                                         ({review.likes})
                                     </Button>
                                     <Button
                                         startIcon={<ThumbDownIcon />}
                                         size="small"
-                                        sx={{ color: '#666' }}
+                                        sx={{
+                                            color: '#666',
+                                            fontSize: { xs: '0.75rem', md: '0.875rem' },
+                                            minWidth: 'auto'
+                                        }}
                                     >
                                         ({review.dislikes})
                                     </Button>
@@ -356,12 +538,24 @@ const ReviewDetailPage: React.FC = () => {
                 </Box>
 
                 {/* Q&A Section */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+                <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            mb: { xs: 2, md: 3 },
+                            fontWeight: 700,
+                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                        }}
+                    >
                         Hỏi - Đáp sản phẩm
                     </Typography>
 
-                    <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: { xs: 2, sm: 2 },
+                        mb: 3
+                    }}>
                         <TextField
                             fullWidth
                             placeholder="Tìm kiếm câu trả lời"
@@ -383,7 +577,10 @@ const ReviewDetailPage: React.FC = () => {
                             sx={{
                                 backgroundColor: '#f58220',
                                 '&:hover': { backgroundColor: '#e6731a' },
-                                px: 3
+                                px: { xs: 2, md: 3 },
+                                py: { xs: 1, md: 1.5 },
+                                fontSize: { xs: '0.875rem', md: '1rem' },
+                                alignSelf: { xs: 'stretch', sm: 'flex-start' }
                             }}
                         >
                             Đặt một câu hỏi
@@ -392,19 +589,29 @@ const ReviewDetailPage: React.FC = () => {
 
                     <Box sx={{
                         textAlign: 'center',
-                        py: 4,
+                        py: { xs: 3, md: 4 },
                         backgroundColor: '#f9f9f9',
                         borderRadius: 2
                     }}>
-                        <Typography sx={{ color: '#666' }}>
+                        <Typography sx={{
+                            color: '#666',
+                            fontSize: { xs: '0.875rem', md: '1rem' }
+                        }}>
                             Chưa có câu hỏi nào!
                         </Typography>
                     </Box>
                 </Box>
 
                 {/* Related Products */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+                <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            mb: { xs: 2, md: 3 },
+                            fontWeight: 700,
+                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                        }}
+                    >
                         Sản phẩm liên quan
                     </Typography>
                     <Box sx={{
@@ -412,9 +619,10 @@ const ReviewDetailPage: React.FC = () => {
                         gridTemplateColumns: {
                             xs: 'repeat(2, 1fr)',
                             sm: 'repeat(3, 1fr)',
-                            md: 'repeat(5, 1fr)'
+                            md: 'repeat(4, 1fr)',
+                            lg: 'repeat(5, 1fr)'
                         },
-                        gap: 2
+                        gap: { xs: 1.5, md: 2 }
                     }}>
                         {relatedProducts.map((product) => (
                             <Card
@@ -436,7 +644,7 @@ const ReviewDetailPage: React.FC = () => {
                                     alt={product.name}
                                     sx={{
                                         width: '100%',
-                                        height: 150,
+                                        height: { xs: 120, sm: 140, md: 150 },
                                         objectFit: 'cover',
                                         transition: 'transform 0.3s ease',
                                         '&:hover': {
@@ -444,7 +652,7 @@ const ReviewDetailPage: React.FC = () => {
                                         }
                                     }}
                                 />
-                                <CardContent sx={{ p: 2 }}>
+                                <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
                                     <Typography
                                         variant="body2"
                                         sx={{
@@ -454,24 +662,51 @@ const ReviewDetailPage: React.FC = () => {
                                             WebkitLineClamp: 2,
                                             WebkitBoxOrient: 'vertical',
                                             overflow: 'hidden',
-                                            minHeight: '2.8em'
+                                            minHeight: { xs: '2.4em', md: '2.8em' },
+                                            fontSize: { xs: '0.75rem', sm: '0.875rem', md: '0.875rem' },
+                                            lineHeight: 1.2
                                         }}
                                     >
                                         {product.name}
                                     </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                        <StarIcon sx={{ color: '#ffb400', fontSize: 16 }} />
-                                        <Typography variant="body2">{product.rating}</Typography>
-                                        <Typography variant="body2" sx={{ color: '#666' }}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: { xs: 0.5, md: 1 },
+                                        mb: 1,
+                                        flexWrap: 'wrap'
+                                    }}>
+                                        <StarIcon sx={{
+                                            color: '#ffb400',
+                                            fontSize: { xs: 14, md: 16 }
+                                        }} />
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+                                        >
+                                            {product.rating}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: '#666',
+                                                fontSize: { xs: '0.75rem', md: '0.875rem' }
+                                            }}
+                                        >
                                             Đã bán: {product.sold}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: { xs: 0.5, md: 1 },
+                                        flexWrap: 'wrap'
+                                    }}>
                                         {product.priceOriginal && (
                                             <Typography sx={{
                                                 color: '#999',
                                                 textDecoration: 'line-through',
-                                                fontSize: 14
+                                                fontSize: { xs: 12, md: 14 }
                                             }}>
                                                 {product.priceOriginal}₫
                                             </Typography>
@@ -481,7 +716,7 @@ const ReviewDetailPage: React.FC = () => {
                                             sx={{
                                                 color: '#f58220',
                                                 fontWeight: 700,
-                                                fontSize: 16
+                                                fontSize: { xs: 14, md: 16 }
                                             }}
                                         >
                                             {product.priceCurrent === 'Liên hệ'

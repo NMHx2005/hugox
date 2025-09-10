@@ -31,13 +31,10 @@ import {
     ProductEditPage,
     CategoryListPage,
     CategoryFormPage,
-    OrderListPage,
-    OrderDetailPage,
     CustomerListPage,
     CustomerDetailPage,
     NewsListPage,
     NewsFormPage,
-    ReviewListPage,
     UserListPage,
     UserFormPage,
     GeneralSettingsPage,
@@ -85,10 +82,6 @@ const AppRouter: React.FC = () => {
                 <Route path="/admin/categories/create" element={<CategoryFormPage />} />
                 <Route path="/admin/categories/:id/edit" element={<CategoryFormPage />} />
 
-                {/* Admin Order Routes */}
-                <Route path="/admin/orders" element={<OrderListPage />} />
-                <Route path="/admin/orders/:id" element={<OrderDetailPage />} />
-
                 {/* Admin Customer Routes */}
                 <Route path="/admin/customers" element={<CustomerListPage />} />
                 <Route path="/admin/customers/:id" element={<CustomerDetailPage />} />
@@ -97,9 +90,6 @@ const AppRouter: React.FC = () => {
                 <Route path="/admin/news" element={<NewsListPage />} />
                 <Route path="/admin/news/create" element={<NewsFormPage />} />
                 <Route path="/admin/news/:id/edit" element={<NewsFormPage />} />
-
-                {/* Admin Review Routes */}
-                <Route path="/admin/reviews" element={<ReviewListPage />} />
 
                 {/* Admin User Routes */}
                 <Route path="/admin/users" element={<UserListPage />} />
