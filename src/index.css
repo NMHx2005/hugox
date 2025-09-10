@@ -1,7 +1,7 @@
 /* Import Global Styles */
 @import './styles/global.css';
 
-/* Override default Vite styles for Lumias theme */
+/* Override default Vite styles for HUGOX theme */
 :root {
   font-family: 'Roboto', sans-serif;
   line-height: 1.6;

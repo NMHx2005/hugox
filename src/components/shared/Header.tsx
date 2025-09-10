@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AppBar, Toolbar, Box, IconButton } from '@mui/material';
-import { Search as SearchIcon, Menu as MenuIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Menu as MenuIcon, KeyboardArrowDown as KeyboardArrowDown } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import TrendingBar from '../client/Home/TrendingBar';
 // import api from '../../api'; // tạm thời không gọi API thật
@@ -49,6 +49,43 @@ const Header: React.FC = () => {
 
     const categories = MOCK_API_CATEGORIES;
     const products = MOCK_API_PRODUCTS;
+
+    // Mobile menu model (2-level)
+    const mobileMenuItems = [
+        { label: 'Trang chủ', to: '/' },
+        { label: 'Giới thiệu', to: '/about' },
+        { label: 'Mới & Nổi Bật', to: '/featured' },
+        {
+            label: 'Điện gia dụng',
+            children: [
+                { label: 'Máy Xay Sinh Tố Công Nghiệp', slug: 'may-xay-sinh-to-cong-nghiep' },
+                { label: 'Máy Ép Chậm', slug: 'may-ep-cham' },
+                { label: 'Máy làm sữa hạt', slug: 'may-lam-sua-hat' },
+                { label: 'Máy xay thịt', slug: 'may-xay-thit' },
+            ],
+        },
+        { label: 'Máy hút ẩm', to: '/categories/dehumidifier' },
+        { label: 'Quạt', to: '/categories/fans' },
+        {
+            label: 'Thiết bị nhà bếp',
+            children: [
+                { label: 'Nồi Áp Suất', slug: 'noi-ap-suat' },
+                { label: 'Nồi & Chảo', slug: 'noi-chao' },
+                { label: 'Nồi chiên Hấp đa năng', slug: 'noi-chien-hap-da-nang' },
+                { label: 'Dụng cụ nhà bếp', slug: 'dung-cu-nha-bep' },
+            ],
+        },
+        { label: 'Sức khoẻ & Làm đẹp', to: '/categories/health-beauty' },
+        { label: 'Thiết bị khác', to: '/categories/others' },
+        { label: 'Reviews', to: '/reviews' },
+        { label: 'Tin tức', to: '/news' },
+        { label: 'Liên hệ', to: '/contact' },
+    ];
+
+    const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+    const toggleGroup = (label: string) => {
+        setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
+    };
 
     // Simulate API fetch (để sẵn khung, hiện tại dùng dữ liệu mock)
     // useEffect(() => {
@@ -293,14 +330,73 @@ const Header: React.FC = () => {
                             <Box onClick={() => setIsMobileMenuOpen(false)} sx={{ marginLeft: 'auto', fontSize: '14px', cursor: 'pointer' }}>Đóng</Box>
                         </Box>
                         <Box sx={{ fontWeight: 700, fontSize: '14px', marginBottom: 1 }}>Danh mục</Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                            <Link to="/featured" style={{ textDecoration: 'none', color: '#333', fontSize: '14px', fontWeight: 700 }}>Mới & Nổi Bật</Link>
-                            {categories.map((c) => (
-                                <Link key={c.id} to={`/categories/${c.slug || c.id}`} style={{ textDecoration: 'none', color: '#333', fontSize: '14px' }}>
-                                    {c.name}
-                                </Link>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            {mobileMenuItems.map((item) => (
+                                <Box key={item.label}>
+                                    {item.children ? (
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                padding: '12px 8px',
+                                                borderBottom: '1px solid #f0f0f0',
+                                                cursor: 'pointer',
+                                                fontSize: '14px',
+                                                fontWeight: 500,
+                                                color: '#222'
+                                            }}
+                                            onClick={() => toggleGroup(item.label)}
+                                        >
+                                            <span>{item.label}</span>
+                                            <KeyboardArrowDown
+                                                sx={{
+                                                    transform: openGroups[item.label] ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                    transition: 'transform .2s',
+                                                    color: '#666'
+                                                }}
+                                            />
+                                        </Box>
+                                    ) : (
+                                        <Link
+                                            to={item.to as string}
+                                            style={{
+                                                display: 'block',
+                                                padding: '12px 8px',
+                                                borderBottom: '1px solid #f0f0f0',
+                                                textDecoration: 'none',
+                                                color: '#222',
+                                                fontSize: '14px'
+                                            }}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    )}
+
+                                    {item.children && openGroups[item.label] && (
+                                        <Box sx={{ pl: 2 }}>
+                                            {item.children.map((child) => (
+                                                <Link
+                                                    key={child.slug}
+                                                    to={`/categories/${child.slug}`}
+                                                    style={{
+                                                        display: 'block',
+                                                        padding: '10px 8px',
+                                                        borderBottom: '1px solid #f7f7f7',
+                                                        textDecoration: 'none',
+                                                        color: '#444',
+                                                        fontSize: '14px'
+                                                    }}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                >
+                                                    {child.label}
+                                                </Link>
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Box>
                             ))}
-                            <Link to="/reviews" style={{ textDecoration: 'none', color: '#333', fontSize: '14px' }}>Reviews</Link>
                         </Box>
                     </Box>
                 </Box>

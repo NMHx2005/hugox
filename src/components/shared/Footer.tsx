@@ -36,32 +36,6 @@ const Footer: React.FC = () => {
         'Chính sách vận chuyển'
     ];
 
-    const brandLogos = [
-        {
-            src: 'https://storage.googleapis.com/a1aa/image/1de7f6ae-c6c3-4c07-38cd-44801480a951.jpg',
-            alt: 'Hoplong brand logo'
-        },
-        {
-            src: 'https://storage.googleapis.com/a1aa/image/f24335fc-d07d-45f0-9021-cb181bdcb05b.jpg',
-            alt: 'GIGA.vn brand logo'
-        },
-        {
-            src: 'https://storage.googleapis.com/a1aa/image/5e8120a5-1245-4f85-5af2-ce6413464860.jpg',
-            alt: 'GIGA electric brand logo'
-        },
-        {
-            src: 'https://storage.googleapis.com/a1aa/image/c0c20318-f91f-438e-3c9a-0b587cf6cda3.jpg',
-            alt: 'Hoplong Industry Mall brand logo'
-        },
-        {
-            src: 'https://storage.googleapis.com/a1aa/image/1bdb0735-cac5-440b-6215-6f5d9894e57a.jpg',
-            alt: 'Powered by hoplong GIGAcare brand logo'
-        },
-        {
-            src: 'https://storage.googleapis.com/a1aa/image/43c10381-85bd-4f94-3008-13c3558460b2.jpg',
-            alt: 'GIGA future by hoplongtech brand logo'
-        }
-    ];
 
     return (
         <Box
@@ -97,9 +71,9 @@ const Footer: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 1.5 }}>
                         <Box
                             component="img"
-                            src="https://storage.googleapis.com/a1aa/image/3677915b-6909-433b-d129-397c17433d68.jpg"
+                            src="/logo.jpg"
                             alt="Lumias logo"
-                            sx={{ width: 48, height: 48 }}
+                            sx={{ width: 200, height: 70 }}
                         />
                         <Typography
                             variant="h5"
@@ -110,7 +84,7 @@ const Footer: React.FC = () => {
                                 fontFamily: 'Roboto, sans-serif'
                             }}
                         >
-                            LUMIAS
+
                         </Typography>
                     </Box>
 
@@ -120,7 +94,7 @@ const Footer: React.FC = () => {
                     </Typography>
 
                     {/* Brand Logos */}
-                    <Box
+                    {/* <Box
                         sx={{
                             display: 'flex',
                             flexWrap: 'wrap',
@@ -137,7 +111,7 @@ const Footer: React.FC = () => {
                                 sx={{ height: 28, objectFit: 'contain' }}
                             />
                         ))}
-                    </Box>
+                    </Box> */}
 
                     {/* Social Media */}
                     <Box
@@ -170,7 +144,7 @@ const Footer: React.FC = () => {
                     </Box>
 
                     {/* Certifications */}
-                    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'nowrap' }}>
+                    {/* <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'nowrap' }}>
                         <Box
                             component="img"
                             src="https://storage.googleapis.com/a1aa/image/1e3bc2c5-664a-4176-5d31-c3a083f09ae6.jpg"
@@ -183,7 +157,7 @@ const Footer: React.FC = () => {
                             alt="DMCA protected"
                             sx={{ height: 40, objectFit: 'contain' }}
                         />
-                    </Box>
+                    </Box> */}
                 </Box>
 
                 {/* Featured Categories */}
@@ -423,7 +397,7 @@ const Footer: React.FC = () => {
                 }}
             >
                 <Typography sx={{ fontSize: '14px', color: '#999' }}>
-                    Copyright 2024 © lumias.vn
+                    Copyright 2025 © HugoX | HungDan
                 </Typography>
             </Box>
         </Box>

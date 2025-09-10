@@ -7,10 +7,10 @@ const AboutPage: React.FC = () => {
         <Layout>
             <Box sx={{ padding: 3 }}>
                 <Typography variant="h4" component="h1">
-                    Giới thiệu về Lumias
+                    Giới thiệu về HUGOX
                 </Typography>
                 <Typography variant="body1">
-                    Lumias - Thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh
+                    HUGOX - Thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh
                 </Typography>
                 {/* Company Info */}
                 {/* Mission & Vision */}

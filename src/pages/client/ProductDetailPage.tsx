@@ -267,8 +267,9 @@ const ProductDetailPage: React.FC = () => {
                                         px: 3,
                                         py: 1.5
                                     }}
+                                    onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
                                 >
-                                    LIÊN HỆ LÀM ĐẠI LÝ
+                                    MUA HÀNG
                                 </Button>
                                 <Button
                                     variant="outlined"
@@ -283,6 +284,7 @@ const ProductDetailPage: React.FC = () => {
                                         px: 3,
                                         py: 1.5
                                     }}
+                                    onClick={() => window.open('tel:0878784842', '_self')}
                                 >
                                     HỖ TRỢ KHÁCH HÀNG
                                 </Button>

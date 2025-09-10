@@ -98,7 +98,7 @@ const AboutSection: React.FC = () => {
                     <Box
                         component="img"
                         src="/Banner-web-1.jpg"
-                        alt="Không gian sống hiện đại với các sản phẩm Lumias"
+                        alt="Không gian sống hiện đại với các sản phẩm HUGOX"
                         sx={{
                             width: '100%',
                             height: '100%',
