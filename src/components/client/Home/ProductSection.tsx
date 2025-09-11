@@ -98,9 +98,9 @@ const ProductSection: React.FC = () => {
                                 textAlign: "left"
                             }}
                         >
-                            Lumias là thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh,
+                            HUGOX là thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh,
                             không dây và không giới hạn. Với uy tín và chất lượng được khẳng định trên thị trường
-                            thương mại điện tử Hàn Quốc, Lumias đã mở rộng phân phối tại các thị trường quốc tế,
+                            thương mại điện tử Hàn Quốc, HUGOX đã mở rộng phân phối tại các thị trường quốc tế,
                             đặc biệt là Việt Nam thông qua Hoplongtech.
                         </Typography>
 

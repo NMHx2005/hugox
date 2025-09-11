@@ -77,8 +77,8 @@ const Header: React.FC = () => {
         },
         { label: 'Sức khoẻ & Làm đẹp', to: '/categories/health-beauty' },
         { label: 'Thiết bị khác', to: '/categories/others' },
-        { label: 'Reviews', to: '/reviews' },
-        { label: 'Tin tức', to: '/news' },
+        // { label: 'Reviews', to: '/reviews' },
+        // { label: 'Tin tức', to: '/news' },
         { label: 'Liên hệ', to: '/contact' },
     ];
 
