@@ -12,7 +12,9 @@ const Header: React.FC = () => {
 
     // Hover dropdown state
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLinhKienMenuOpen, setIsLinhKienMenuOpen] = useState(false);
     const triggerRef = useRef<HTMLDivElement | null>(null);
+    const linhKienTriggerRef = useRef<HTMLDivElement | null>(null);
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -37,6 +39,13 @@ const Header: React.FC = () => {
         'Bếp Từ - Hồng Ngoại'
     ];
 
+    // Mock API response - danh sách linh kiện thay thế cho dropdown
+    const MOCK_LINH_KIEN_PRODUCTS = [
+        'Linh kiện máy xay sữa hạt',
+        'Linh kiện máy ép trái cây',
+        'Linh kiện máy xay sinh tố'
+    ];
+
     // Categories for inline navigation (vẫn giữ để hiển thị inline)
     const MOCK_API_CATEGORIES = [
         { id: 'appliances', name: 'Điện gia dụng', slug: 'appliances' },
@@ -44,6 +53,7 @@ const Header: React.FC = () => {
         { id: 'fans', name: 'Quạt', slug: 'fans' },
         { id: 'kitchen', name: 'Thiết bị nhà bếp', slug: 'kitchen' },
         { id: 'health-beauty', name: 'Sức khoẻ & Làm đẹp', slug: 'health-beauty' },
+        { id: 'linh-kien-thay-the', name: 'Linh kiện thay thế', slug: 'linh-kien-thay-the' },
         { id: 'others', name: 'Thiết bị khác', slug: 'others' },
     ];
 
@@ -76,6 +86,14 @@ const Header: React.FC = () => {
             ],
         },
         { label: 'Sức khoẻ & Làm đẹp', to: '/categories/health-beauty' },
+        {
+            label: 'Linh kiện thay thế',
+            children: [
+                { label: 'Linh kiện máy xay sữa hạt', slug: 'linh-kien-may-xay-sua-hat' },
+                { label: 'Linh kiện máy ép trái cây', slug: 'linh-kien-may-ep-trai-cay' },
+                { label: 'Linh kiện máy xay sinh tố', slug: 'linh-kien-may-xay-sinh-to' },
+            ],
+        },
         { label: 'Thiết bị khác', to: '/categories/others' },
         // { label: 'Reviews', to: '/reviews' },
         // { label: 'Tin tức', to: '/news' },
@@ -195,6 +213,62 @@ const Header: React.FC = () => {
                                         {c.name}
                                     </Link>
                                 ))}
+
+                                {/* Linh kiện thay thế dropdown */}
+                                <Box
+                                    sx={{ position: 'relative' }}
+                                    onMouseEnter={() => setIsLinhKienMenuOpen(true)}
+                                    onMouseLeave={() => setIsLinhKienMenuOpen(false)}
+                                >
+                                    <Box ref={linhKienTriggerRef} style={{ textDecoration: 'none', color: '#000', fontSize: '14px', fontWeight: 500, cursor: 'default' }}>
+                                        Linh kiện thay thế
+                                    </Box>
+                                    {isLinhKienMenuOpen && (
+                                        <Box
+                                            sx={{
+                                                position: 'absolute',
+                                                top: '100%',
+                                                left: 0,
+                                                backgroundColor: '#fff',
+                                                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                                borderRadius: '8px',
+                                                padding: 2,
+                                                minWidth: '250px',
+                                                zIndex: 1200,
+                                            }}
+                                            onMouseEnter={() => setIsLinhKienMenuOpen(true)}
+                                            onMouseLeave={() => setIsLinhKienMenuOpen(false)}
+                                        >
+                                            {/* Hover buffer to avoid accidental close when moving from trigger to menu */}
+                                            <Box sx={{ position: 'absolute', top: -8, left: 0, right: 0, height: 8, backgroundColor: 'transparent' }} />
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                                {MOCK_LINH_KIEN_PRODUCTS.map((product, index) => (
+                                                    <Box
+                                                        key={index}
+                                                        component={Link}
+                                                        to={`/categories/${product.toLowerCase().replace(/\s+/g, '-').replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a').replace(/[èéẹẻẽêềếệểễ]/g, 'e').replace(/[ìíịỉĩ]/g, 'i').replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o').replace(/[ùúụủũưừứựửữ]/g, 'u').replace(/[ỳýỵỷỹ]/g, 'y').replace(/đ/g, 'd')}`}
+                                                        sx={{
+                                                            padding: '8px 12px',
+                                                            fontSize: '13px',
+                                                            cursor: 'pointer',
+                                                            borderRadius: '4px',
+                                                            transition: 'background-color 0.2s ease',
+                                                            textDecoration: 'none',
+                                                            color: 'inherit',
+                                                            display: 'block',
+                                                            '&:hover': {
+                                                                backgroundColor: '#f8f9fa',
+                                                                color: '#f58220'
+                                                            }
+                                                        }}
+                                                    >
+                                                        {product}
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </Box>
 
                                 {/* Hoverable dropdown - keep open when moving mouse into submenu */}
                                 <Box

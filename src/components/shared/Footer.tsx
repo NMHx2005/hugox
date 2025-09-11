@@ -71,7 +71,7 @@ const Footer: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 1.5 }}>
                         <Box
                             component="img"
-                            src="/logo.jpg"
+                            src="/logo-removebg-preview.png"
                             alt="Lumias logo"
                             sx={{ width: 200, height: 70 }}
                         />

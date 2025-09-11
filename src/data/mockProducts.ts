@@ -450,6 +450,72 @@ export const MOCK_PRODUCTS: Product[] = [
         href: 'https://lumias.vn/thung-rac-dung-tich-20l-lumias-ltc-20l/',
         category: 'others'
     },
+
+    // Linh kiện thay thế - Máy xay sữa hạt
+    {
+        id: 101,
+        name: 'Cối thủy tinh máy làm sữa hạt Lumias M135',
+        image: 'https://lumias.vn/wp-content/uploads/2025/09/may-lam-sua-hat-1-35l-lumias-m135-405x405.jpg',
+        priceCurrent: '390.000',
+        rating: 4.7,
+        sold: 128,
+        href: 'https://lumias.vn/phu-kien-coi-thuy-tinh-may-lam-sua-hat-m135/',
+        category: 'linh-kien-may-xay-sua-hat'
+    },
+    {
+        id: 102,
+        name: 'Lưỡi dao thép máy làm sữa hạt Lumias',
+        image: 'https://lumias.vn/wp-content/uploads/2025/09/may-lam-sua-hat-1-35l-lumias-m135-405x405.jpg',
+        priceCurrent: '190.000',
+        rating: 4.8,
+        sold: 212,
+        href: 'https://lumias.vn/luoi-dao-thep-may-lam-sua-hat-lumias/',
+        category: 'linh-kien-may-xay-sua-hat'
+    },
+
+    // Linh kiện thay thế - Máy ép trái cây
+    {
+        id: 103,
+        name: 'Lưới lọc máy ép trái cây Lumias',
+        image: 'https://lumias.vn/wp-content/uploads/2025/07/bep-tu-don-lumias-lk25-220w-405x405.jpg',
+        priceCurrent: '160.000',
+        rating: 4.6,
+        sold: 175,
+        href: 'https://lumias.vn/luoi-loc-may-ep-trai-cay-lumias/',
+        category: 'linh-kien-may-ep-trai-cay'
+    },
+    {
+        id: 104,
+        name: 'Trục ép máy ép trái cây Lumias',
+        image: 'https://lumias.vn/wp-content/uploads/2025/07/bep-tu-don-lumias-lk25-220w-405x405.jpg',
+        priceCurrent: '290.000',
+        rating: 4.7,
+        sold: 142,
+        href: 'https://lumias.vn/truc-ep-may-ep-trai-cay-lumias/',
+        category: 'linh-kien-may-ep-trai-cay'
+    },
+
+    // Linh kiện thay thế - Máy xay sinh tố
+    {
+        id: 105,
+        name: 'Cối xay máy xay sinh tố Lumias X12',
+        image: 'https://lumias.vn/wp-content/uploads/2025/03/quat-cam-tay-lumias-x12-01-405x405.jpg',
+        priceCurrent: '220.000',
+        rating: 4.8,
+        sold: 201,
+        href: 'https://lumias.vn/coi-xay-may-xay-sinh-to-lumias-x12/',
+        category: 'linh-kien-may-xay-sinh-to'
+    },
+    {
+        id: 106,
+        name: 'Lưỡi dao máy xay sinh tố Lumias X15',
+        image: 'https://lumias.vn/wp-content/uploads/2025/03/quat-cam-tay-lumias-x12-01-405x405.jpg',
+        priceCurrent: '180.000',
+        rating: 4.9,
+        sold: 265,
+        href: 'https://lumias.vn/luoi-dao-may-xay-sinh-to-lumias-x15/',
+        category: 'linh-kien-may-xay-sinh-to'
+    },
 ];
 
 // Helper function to get products by category
@@ -594,5 +660,25 @@ export const CATEGORY_CONFIGS = {
         bannerTitle: 'THIẾT BỊ KHÁC',
         bannerSubtitle: 'Các sản phẩm tiện ích khác cho gia đình',
         bannerImage: 'https://lumias.vn/wp-content/uploads/2025/05/Banner-Thiet-bi-khac-1536x518.jpg'
+    },
+
+    // Linh kiện thay thế
+    'linh-kien-may-xay-sua-hat': {
+        name: 'Linh kiện máy xay sữa hạt',
+        bannerTitle: 'LINH KIỆN MÁY XAY SỮA HẠT',
+        bannerSubtitle: 'Phụ kiện thay thế chính hãng cho máy làm sữa hạt',
+        bannerImage: 'https://lumias.vn/wp-content/uploads/2025/05/Banner-Thiet-bi-nha-bep-1536x518.jpg'
+    },
+    'linh-kien-may-ep-trai-cay': {
+        name: 'Linh kiện máy ép trái cây',
+        bannerTitle: 'LINH KIỆN MÁY ÉP TRÁI CÂY',
+        bannerSubtitle: 'Phụ kiện thay thế cho các dòng máy ép Lumias',
+        bannerImage: 'https://lumias.vn/wp-content/uploads/2025/05/Banner-Thiet-bi-nha-bep-1536x518.jpg'
+    },
+    'linh-kien-may-xay-sinh-to': {
+        name: 'Linh kiện máy xay sinh tố',
+        bannerTitle: 'LINH KIỆN MÁY XAY SINH TỐ',
+        bannerSubtitle: 'Cối, lưỡi dao và phụ kiện máy xay sinh tố',
+        bannerImage: 'https://lumias.vn/wp-content/uploads/2025/05/Banner-Thiet-bi-nha-bep-1536x518.jpg'
     }
 };
