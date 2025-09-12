@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/shared/Layout';
-import { get_product } from '../../api/client/products';
+import { get_product, get_products } from '../../api/client/products';
 import { Product } from '../../api/client/products';
 
 const ProductDetailPage: React.FC = () => {
@@ -47,14 +47,29 @@ const ProductDetailPage: React.FC = () => {
                 setError(null);
                 const response = await get_product(id);
                 setProduct(response.data.product);
-                setRelatedProducts(response.data.related || []);
                 setRatingAvg(response.data.ratingAvg || 0);
                 setReviewsCount(response.data.reviewsCount || 0);
+
+                // Load 4 random products for related products
+                await loadRelatedProducts();
             } catch (err) {
                 console.error('Error loading product:', err);
                 setError('Không thể tải thông tin sản phẩm');
             } finally {
                 setLoading(false);
+            }
+        };
+
+        const loadRelatedProducts = async () => {
+            try {
+                const response = await get_products({ limit: 20, page: 1 });
+                // Get 4 random products from the response, excluding current product
+                const allProducts = response.data.products.filter(p => p._id !== id);
+                const shuffled = allProducts.sort(() => 0.5 - Math.random());
+                setRelatedProducts(shuffled.slice(0, 4));
+            } catch (err) {
+                console.error('Error loading related products:', err);
+                setRelatedProducts([]);
             }
         };
 
@@ -462,86 +477,88 @@ const ProductDetailPage: React.FC = () => {
                 )}
 
                 {/* Related Products */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
-                        Sản phẩm liên quan
-                    </Typography>
-                    <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: {
-                            xs: 'repeat(2, 1fr)',
-                            sm: 'repeat(3, 1fr)',
-                            md: 'repeat(5, 1fr)'
-                        },
-                        gap: 2
-                    }}>
-                        {relatedProducts.map((relatedProduct) => (
-                            <Card
-                                key={relatedProduct._id}
-                                sx={{
-                                    height: '100%',
-                                    '&:hover': {
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: 3
-                                    },
-                                    transition: 'all 0.2s ease',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => window.location.href = `/products/${relatedProduct.slug}`}
-                            >
-                                <Box
-                                    component="img"
-                                    src={relatedProduct.images?.[0] || '/placeholder-product.jpg'}
-                                    alt={relatedProduct.name}
+                {relatedProducts.length > 0 && (
+                    <Box sx={{ mb: 4 }}>
+                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+                            Sản phẩm liên quan
+                        </Typography>
+                        <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                                xs: 'repeat(2, 1fr)',
+                                sm: 'repeat(3, 1fr)',
+                                md: 'repeat(4, 1fr)'
+                            },
+                            gap: 2
+                        }}>
+                            {relatedProducts.map((relatedProduct) => (
+                                <Card
+                                    key={relatedProduct._id}
                                     sx={{
-                                        width: '100%',
-                                        height: 150,
-                                        objectFit: 'cover',
-                                        transition: 'transform 0.3s ease',
+                                        height: '100%',
                                         '&:hover': {
-                                            transform: 'scale(1.05)',
-                                        }
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: 3
+                                        },
+                                        transition: 'all 0.2s ease',
+                                        cursor: 'pointer'
                                     }}
-                                />
-                                <CardContent sx={{ p: 2 }}>
-                                    <Typography
-                                        variant="body2"
+                                    onClick={() => window.location.href = `/products/${relatedProduct.slug}`}
+                                >
+                                    <Box
+                                        component="img"
+                                        src={relatedProduct.images?.[0] || '/placeholder-product.jpg'}
+                                        alt={relatedProduct.name}
                                         sx={{
-                                            fontWeight: 600,
-                                            mb: 1,
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: 'vertical',
-                                            overflow: 'hidden',
-                                            minHeight: '2.8em'
+                                            width: '100%',
+                                            height: 150,
+                                            objectFit: 'cover',
+                                            transition: 'transform 0.3s ease',
+                                            '&:hover': {
+                                                transform: 'scale(1.05)',
+                                            }
                                         }}
-                                    >
-                                        {relatedProduct.name}
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                        <StarIcon sx={{ color: '#ffb400', fontSize: 16 }} />
-                                        <Typography variant="body2">{relatedProduct.ratingAvg?.toFixed(1) || '0.0'}</Typography>
-                                        {relatedProduct.sold && (
-                                            <Typography variant="body2" sx={{ color: '#666' }}>
-                                                Đã bán: {relatedProduct.sold}
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            color: '#f58220',
-                                            fontWeight: 700,
-                                            fontSize: 16
-                                        }}
-                                    >
-                                        {relatedProduct.price.toLocaleString('vi-VN')}₫
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                    />
+                                    <CardContent sx={{ p: 2 }}>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontWeight: 600,
+                                                mb: 1,
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                minHeight: '2.8em'
+                                            }}
+                                        >
+                                            {relatedProduct.name}
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                            <StarIcon sx={{ color: '#ffb400', fontSize: 16 }} />
+                                            <Typography variant="body2">{relatedProduct.ratingAvg?.toFixed(1) || '0.0'}</Typography>
+                                            {relatedProduct.sold && (
+                                                <Typography variant="body2" sx={{ color: '#666' }}>
+                                                    Đã bán: {relatedProduct.sold}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        <Typography
+                                            variant="h6"
+                                            sx={{
+                                                color: '#f58220',
+                                                fontWeight: 700,
+                                                fontSize: 16
+                                            }}
+                                        >
+                                            {relatedProduct.price.toLocaleString('vi-VN')}₫
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </Box>
                     </Box>
-                </Box>
+                )}
             </Box>
         </Layout>
     );
