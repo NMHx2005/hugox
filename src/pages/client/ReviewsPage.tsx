@@ -1,163 +1,409 @@
-import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
-import Header from '../../components/shared/Header';
-import Footer from '../../components/shared/Footer';
-import MobileBottomBar from '../../components/shared/MobileBottomBar';
+import React, { useState, useEffect } from 'react';
+import {
+    Box,
+    Typography,
+    Card,
+    CardContent,
+    Rating,
+    Chip,
+    TextField,
+    InputAdornment,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Pagination,
+    CircularProgress,
+    Alert,
+    Breadcrumbs,
+    Link as MuiLink,
+    Avatar,
+    Button
+} from '@mui/material';
+import {
+    Search as SearchIcon,
+    ThumbUp as ThumbUpIcon,
+    ThumbDown as ThumbDownIcon,
+    Verified as VerifiedIcon
+} from '@mui/icons-material';
+import { Link, useSearchParams } from 'react-router-dom';
+import Layout from '../../components/shared/Layout';
+import { get_reviews, get_review_stats, Review } from '../../api/client/reviews';
+
+interface ReviewStats {
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: {
+        5: number;
+        4: number;
+        3: number;
+        2: number;
+        1: number;
+    };
+}
 
 const ReviewsPage: React.FC = () => {
-    const posts = [
-        {
-            id: 1,
-            title: 'Đánh giá chi tiết quạt cầm tay Lumias F3600',
-            date: '30/06/2025',
-            excerpt:
-                'Quạt cầm tay giờ đã khác xưa rất nhiều. Với thiết kế và hoàn thiện tốt, dung lượng pin cao cho...',
-            image:
-                'https://lumias.vn/wp-content/uploads/2025/05/image-24-768x480.webp',
-        },
-        {
-            id: 2,
-            title: 'Review chi tiết quạt DC Lumias F08 Pro',
-            date: '28/06/2025',
-            excerpt:
-                'Lumias F08 Pro hiện đang là mẫu quạt DC được quan tâm nhờ khả năng...',
-            image:
-                'https://lumias.vn/wp-content/uploads/2025/06/review-chi-tiet-quat-dc-lumias-f08-pro-1-768x478.jpg',
-        },
-        {
-            id: 3,
-            title: 'Mổ tung Lumias D3T Pro ra xem nội thất',
-            date: '20/05/2025',
-            excerpt:
-                'Trải nghiệm với máy hút ẩm Lumias D3T Pro, thiết kế đẹp, hoàn thiện chỉn chu...',
-            image:
-                'https://lumias.vn/wp-content/uploads/2025/05/image-24-768x480.webp',
-        },
-        {
-            id: 4,
-            title: 'Trải nghiệm máy giặt mini Lumias WS030 Pro',
-            date: '20/05/2025',
-            excerpt:
-                'Lumias WS030 Pro là chiếc máy giặt mini tự động hoàn toàn, nhỏ gọn...',
-            image:
-                'https://lumias.vn/wp-content/uploads/2025/05/image-24-768x480.webp',
-        },
-        {
-            id: 5,
-            title: 'Trải nghiệm Lumias WS040WH và WS050WH',
-            date: '15/05/2025',
-            excerpt:
-                'Hai mẫu máy giặt mini bản nâng cấp với nhiều cải tiến thực tế...',
-            image:
-                'https://lumias.vn/wp-content/uploads/2025/05/image-24-768x480.webp',
-        },
-        {
-            id: 6,
-            title: 'Test máy lọc không khí Lumias Bulma Pro',
-            date: '15/05/2025',
-            excerpt:
-                'Lumias Bulma Pro có thiết kế đẹp, dễ sử dụng và hiệu quả...',
-            image:
-                'https://lumias.vn/wp-content/uploads/2025/05/image-24-768x480.webp',
-        },
-    ];
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [stats, setStats] = useState<ReviewStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 12,
+        total: 0,
+        pages: 0
+    });
+
+    // Filters
+    const [search, setSearch] = useState(searchParams.get('search') || '');
+    const [rating, setRating] = useState(searchParams.get('rating') || '');
+    const [sort, setSort] = useState(searchParams.get('sort') || '-createdAt');
+
+    useEffect(() => {
+        loadReviews();
+    }, [searchParams]);
+
+    const loadReviews = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const params = {
+                page: Number(searchParams.get('page')) || 1,
+                limit: 12,
+                rating: searchParams.get('rating') ? Number(searchParams.get('rating')) : undefined,
+                search: searchParams.get('search') || undefined,
+                sort: searchParams.get('sort') || '-createdAt'
+            };
+
+            const response = await get_reviews(params);
+            setReviews(response.data.reviews);
+            setPagination(response.data.pagination);
+        } catch (err) {
+            console.error('Error loading reviews:', err);
+            setError('Không thể tải danh sách đánh giá');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSearch = () => {
+        const newParams = new URLSearchParams();
+        if (search) newParams.set('search', search);
+        if (rating) newParams.set('rating', rating);
+        if (sort !== '-createdAt') newParams.set('sort', sort);
+        newParams.set('page', '1');
+
+        setSearchParams(newParams);
+    };
+
+    const handleRatingChange = (newRating: string) => {
+        setRating(newRating);
+        const newParams = new URLSearchParams(searchParams);
+        if (newRating) {
+            newParams.set('rating', newRating);
+        } else {
+            newParams.delete('rating');
+        }
+        newParams.set('page', '1');
+        setSearchParams(newParams);
+    };
+
+    const handleSortChange = (newSort: string) => {
+        setSort(newSort);
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('sort', newSort);
+        newParams.set('page', '1');
+        setSearchParams(newParams);
+    };
+
+    const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('page', value.toString());
+        setSearchParams(newParams);
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    const getRatingColor = (rating: number) => {
+        if (rating >= 4) return '#4caf50';
+        if (rating >= 3) return '#ff9800';
+        return '#f44336';
+    };
+
+    if (loading) {
+        return (
+            <Layout>
+                <Box className="container" sx={{ mt: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+                    <CircularProgress />
+                </Box>
+            </Layout>
+        );
+    }
+
+    if (error) {
+        return (
+            <Layout>
+                <Box className="container" sx={{ mt: 3 }}>
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                </Box>
+            </Layout>
+        );
+    }
 
     return (
-        <>
-            <Header />
-            <Box sx={{ paddingTop: { xs: '100px', md: '120px' }, paddingBottom: { xs: '100px', md: '120px' } }}>
-                <Box className="container">
-                    {/* Title */}
-                    <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: { xs: 1.5, md: 2 } }}>
-                        Danh mục Reviews HugoX
+        <Layout>
+            <Box className="container" sx={{ mt: 3 }}>
+                {/* Breadcrumbs */}
+                <Breadcrumbs sx={{ mb: 3 }}>
+                    <MuiLink component={Link} to="/" color="inherit">
+                        Trang chủ
+                    </MuiLink>
+                    <Typography color="text.primary">Đánh giá sản phẩm</Typography>
+                </Breadcrumbs>
+
+                {/* Header */}
+                <Box sx={{ mb: 4 }}>
+                    <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 2 }}>
+                        Đánh giá sản phẩm
                     </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                        Xem những đánh giá chân thực từ khách hàng về sản phẩm của chúng tôi
+                    </Typography>
+                </Box>
 
-                    {/* Intro box */}
-                    <Box
-                        sx={{
-                            backgroundColor: '#fff7ed',
-                            border: '1px solid #fde6d2',
-                            color: '#7a4b2a',
-                            borderRadius: '8px',
-                            padding: { xs: 2, md: 2.5 },
-                            mb: { xs: 2, md: 3 },
-                            lineHeight: 1.7,
-                            fontSize: '14px',
+                {/* Filters */}
+                <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <TextField
+                        placeholder="Tìm kiếm đánh giá..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
                         }}
-                    >
-                        Tổng hợp các bài viết review HugoX, chia sẻ các thông tin sản phẩm mới, chương trình khuyến mãi HugoX hấp dẫn, và những thông tin đồng hành cùng các fan yêu thích thương hiệu đến từ Hàn Quốc.
-                        <br />
-                        Ngoài ra Blog HugoX Việt Nam cũng tổng hợp một số công thức nấu ăn với các sản phẩm HugoX, chia sẻ những món ăn đời thường dễ làm tại nhà.
-                    </Box>
+                        sx={{ minWidth: 300 }}
+                    />
 
-                    {/* Grid list */}
-                    <Box
-                        sx={{
-                            display: 'grid',
-                            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
-                            gap: { xs: 2, md: 2.5 },
-                            mb: { xs: 2.5, md: 3 },
-                        }}
-                    >
-                        {posts.map((p, idx) => (
-                            <Box
-                                key={idx}
-                                component={Link}
-                                to={`/reviews/${p.id}`}
-                                sx={{
-                                    backgroundColor: '#fff',
-                                    border: '1px solid #eee',
-                                    borderRadius: '12px',
-                                    overflow: 'hidden',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                                    transition: 'transform .2s ease',
-                                    textDecoration: 'none',
-                                    color: 'inherit',
-                                    '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(0,0,0,0.08)' },
-                                }}
-                            >
-                                <Box sx={{ position: 'relative' }}>
-                                    <Box component="img" src={p.image} alt={p.title} sx={{ width: '100%', height: { xs: 180, md: 200 }, objectFit: 'cover' }} />
-                                    <Box
-                                        sx={{
-                                            position: 'absolute',
-                                            top: 10,
-                                            left: 10,
-                                            backgroundColor: '#ff8a00',
-                                            color: '#fff',
-                                            fontSize: '10px',
-                                            fontWeight: 800,
-                                            padding: '4px 8px',
-                                            borderRadius: '999px',
-                                            letterSpacing: .5,
-                                        }}
-                                    >
-                                        REVIEWS
-                                    </Box>
-                                </Box>
-                                <Box sx={{ padding: 2 }}>
-                                    <Typography component="h3" sx={{ fontSize: '16px', fontWeight: 700, mb: 1, lineHeight: 1.35 }}>
-                                        {p.title}
-                                    </Typography>
-                                    <Typography sx={{ color: '#666', fontSize: '13px', mb: 2, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.excerpt}</Typography>
-                                    <Typography sx={{ color: '#999', fontSize: '12px' }}>{p.date}</Typography>
-                                </Box>
-                            </Box>
-                        ))}
-                    </Box>
+                    <FormControl sx={{ minWidth: 150 }}>
+                        <InputLabel>Đánh giá</InputLabel>
+                        <Select
+                            value={rating}
+                            onChange={(e) => handleRatingChange(e.target.value)}
+                            label="Đánh giá"
+                        >
+                            <MenuItem value="">Tất cả</MenuItem>
+                            <MenuItem value="5">5 sao</MenuItem>
+                            <MenuItem value="4">4 sao</MenuItem>
+                            <MenuItem value="3">3 sao</MenuItem>
+                            <MenuItem value="2">2 sao</MenuItem>
+                            <MenuItem value="1">1 sao</MenuItem>
+                        </Select>
+                    </FormControl>
 
-                    {/* Load more */}
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                        <Button variant="contained" sx={{ backgroundColor: '#1f2937', '&:hover': { backgroundColor: '#111827' }, borderRadius: '999px', px: 3 }}>
-                            Tải thêm
-                        </Button>
+                    <FormControl sx={{ minWidth: 150 }}>
+                        <InputLabel>Sắp xếp</InputLabel>
+                        <Select
+                            value={sort}
+                            onChange={(e) => handleSortChange(e.target.value)}
+                            label="Sắp xếp"
+                        >
+                            <MenuItem value="-createdAt">Mới nhất</MenuItem>
+                            <MenuItem value="createdAt">Cũ nhất</MenuItem>
+                            <MenuItem value="-rating">Đánh giá cao</MenuItem>
+                            <MenuItem value="rating">Đánh giá thấp</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <Box sx={{ ml: 'auto' }}>
+                        <Typography variant="body2" color="text.secondary">
+                            {pagination.total} đánh giá
+                        </Typography>
                     </Box>
                 </Box>
+
+                {/* Reviews Grid */}
+                {reviews.length > 0 ? (
+                    <>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 4 }}>
+                            {reviews.map((review) => (
+                                <Box key={review._id}>
+                                    <Card sx={{ height: '100%' }}>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                                <Avatar sx={{ bgcolor: '#f58220' }}>
+                                                    {review.user?.name?.charAt(0) || 'U'}
+                                                </Avatar>
+                                                <Box sx={{ flexGrow: 1 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                                            {review.user?.name || 'Người dùng ẩn danh'}
+                                                        </Typography>
+                                                        {review.verified && (
+                                                            <Chip
+                                                                icon={<VerifiedIcon />}
+                                                                label="Đã xác thực"
+                                                                size="small"
+                                                                color="success"
+                                                            />
+                                                        )}
+                                                    </Box>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {formatDate(review.createdAt)}
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ textAlign: 'right' }}>
+                                                    <Rating
+                                                        value={review.rating}
+                                                        readOnly
+                                                        size="small"
+                                                        sx={{ color: getRatingColor(review.rating) }}
+                                                    />
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {review.rating}/5
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            {/* Product Info */}
+                                            {review.product && (
+                                                <Box sx={{ mb: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                        Sản phẩm:
+                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        {review.product.images && review.product.images.length > 0 && (
+                                                            <Box
+                                                                component="img"
+                                                                src={review.product.images[0]}
+                                                                alt={review.product.name || 'Sản phẩm'}
+                                                                sx={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 1 }}
+                                                            />
+                                                        )}
+                                                        <Box>
+                                                            <Link
+                                                                to={`/products/${review.product.slug || review.product._id}`}
+                                                                style={{ textDecoration: 'none', color: 'inherit' }}
+                                                            >
+                                                                <Typography
+                                                                    variant="subtitle2"
+                                                                    sx={{
+                                                                        fontWeight: 600,
+                                                                        '&:hover': { color: '#f58220' }
+                                                                    }}
+                                                                >
+                                                                    {review.product.name || 'Sản phẩm không xác định'}
+                                                                </Typography>
+                                                            </Link>
+                                                        </Box>
+                                                    </Box>
+                                                </Box>
+                                            )}
+
+                                            {/* Review Title */}
+                                            {review.title && (
+                                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    {review.title}
+                                                </Typography>
+                                            )}
+
+                                            {/* Review Content */}
+                                            <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
+                                                {review.comment}
+                                            </Typography>
+
+                                            {/* Review Images */}
+                                            {review.images && review.images.length > 0 && (
+                                                <Box sx={{ mb: 2 }}>
+                                                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 1 }}>
+                                                        {review.images.map((image, index) => (
+                                                            <Box key={index}>
+                                                                <Box
+                                                                    component="img"
+                                                                    src={image}
+                                                                    alt={`Review image ${index + 1}`}
+                                                                    sx={{
+                                                                        width: 80,
+                                                                        height: 80,
+                                                                        objectFit: 'cover',
+                                                                        borderRadius: 1,
+                                                                        cursor: 'pointer'
+                                                                    }}
+                                                                />
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
+                                                </Box>
+                                            )}
+
+                                            {/* Action Buttons */}
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                <Button
+                                                    startIcon={<ThumbUpIcon />}
+                                                    size="small"
+                                                    sx={{ color: 'text.secondary' }}
+                                                >
+                                                    {review.likes}
+                                                </Button>
+                                                <Button
+                                                    startIcon={<ThumbDownIcon />}
+                                                    size="small"
+                                                    sx={{ color: 'text.secondary' }}
+                                                >
+                                                    {review.dislikes}
+                                                </Button>
+                                                <Box sx={{ ml: 'auto' }}>
+                                                    <Chip
+                                                        label={review.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
+                                                        size="small"
+                                                        color={review.status === 'approved' ? 'success' : 'warning'}
+                                                    />
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Box>
+                            ))}
+                        </Box>
+
+                        {/* Pagination */}
+                        {pagination.pages > 1 && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                <Pagination
+                                    count={pagination.pages}
+                                    page={pagination.page}
+                                    onChange={handlePageChange}
+                                    color="primary"
+                                    size="large"
+                                />
+                            </Box>
+                        )}
+                    </>
+                ) : (
+                    <Box sx={{ textAlign: 'center', py: 8 }}>
+                        <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
+                            Không tìm thấy đánh giá nào
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                        </Typography>
+                    </Box>
+                )}
             </Box>
-            <MobileBottomBar />
-            <Footer />
-        </>
+        </Layout>
     );
 };
 

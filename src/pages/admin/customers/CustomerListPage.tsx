@@ -1,73 +1,175 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Chip from '@mui/material/Chip';
+import { Box, Typography, TextField, Table, TableBody, TableCell, TableHead, TableRow, Paper, Chip, Button, MenuItem, Pagination, Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
-const leads = Array.from({ length: 12 }).map((_, i) => ({
-    id: i + 1,
-    name: `Khách ${i + 1}`,
-    phone: `09${(Math.random() * 100000000).toFixed(0).padStart(8, '0')}`,
-    email: `khach${i + 1}@mail.com`,
-    subject: i % 3 === 0 ? 'Hỏi giá' : i % 3 === 1 ? 'Bảo hành' : 'Tư vấn',
-    status: i % 2 === 0 ? 'Mới' : 'Đã liên hệ',
-    createdAt: '2025-09-10 10:00'
-}));
+import { get_admin_contacts, delete_admin_contact, update_admin_contact_status, AdminContact } from '../../../api/contacts';
 
 const CustomerListPage: React.FC = () => {
     const navigate = useNavigate();
+    const [items, setItems] = useState<AdminContact[]>([]);
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+
+    useEffect(() => {
+        loadContacts();
+    }, [page, search, statusFilter]);
+
+    const loadContacts = async () => {
+        try {
+            const { items: contacts, pagination } = await get_admin_contacts({
+                page,
+                limit: 12,
+                search: search || undefined,
+                status: statusFilter || undefined
+            });
+            setItems(contacts);
+            setPages(pagination?.pages || 1);
+        } catch (error) {
+            console.error('Error loading contacts:', error);
+            setToast({ open: true, message: 'Lỗi tải danh sách liên hệ', severity: 'error' });
+        }
+    };
+
+    const handleStatusChange = async (id: string, newStatus: AdminContact['status']) => {
+        try {
+            await update_admin_contact_status(id, newStatus);
+            setToast({ open: true, message: 'Cập nhật trạng thái thành công', severity: 'success' });
+            loadContacts();
+        } catch (error) {
+            setToast({ open: true, message: 'Lỗi cập nhật trạng thái', severity: 'error' });
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('Bạn có chắc muốn xóa liên hệ này?')) {
+            try {
+                await delete_admin_contact(id);
+                setToast({ open: true, message: 'Xóa liên hệ thành công', severity: 'success' });
+                loadContacts();
+            } catch (error) {
+                setToast({ open: true, message: 'Lỗi xóa liên hệ', severity: 'error' });
+            }
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'new': return 'primary';
+            case 'contacted': return 'warning';
+            case 'resolved': return 'success';
+            case 'closed': return 'default';
+            default: return 'default';
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'new': return 'Mới';
+            case 'contacted': return 'Đã liên hệ';
+            case 'resolved': return 'Đã giải quyết';
+            case 'closed': return 'Đã đóng';
+            default: return status;
+        }
+    };
 
     return (
         <AdminLayout title="Khách hàng (Leads)">
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>Danh sách liên hệ</Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <TextField placeholder="Tìm theo tên, email, SĐT..." size="small" sx={{ width: 420 }} />
-                <TextField placeholder="Trạng thái" size="small" sx={{ width: 200 }} />
+                <TextField
+                    placeholder="Tìm theo tên, email, SĐT..."
+                    size="small"
+                    sx={{ width: 420 }}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+                <TextField
+                    select
+                    placeholder="Trạng thái"
+                    size="small"
+                    sx={{ width: 200 }}
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                    <MenuItem value="">Tất cả</MenuItem>
+                    <MenuItem value="new">Mới</MenuItem>
+                    <MenuItem value="contacted">Đã liên hệ</MenuItem>
+                    <MenuItem value="resolved">Đã giải quyết</MenuItem>
+                    <MenuItem value="closed">Đã đóng</MenuItem>
+                </TextField>
             </Box>
 
-            <TableContainer component={Paper} elevation={0}>
+            <Paper elevation={0}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
                             <TableCell>Tên</TableCell>
                             <TableCell>SĐT</TableCell>
                             <TableCell>Email</TableCell>
                             <TableCell>Chủ đề</TableCell>
                             <TableCell>Trạng thái</TableCell>
+                            <TableCell>Ưu tiên</TableCell>
                             <TableCell>Thời gian</TableCell>
-                            <TableCell align="right">Chi tiết</TableCell>
+                            <TableCell align="right">Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {leads.map((lead) => (
-                            <TableRow key={lead.id} hover>
-                                <TableCell>{lead.id}</TableCell>
-                                <TableCell>{lead.name}</TableCell>
-                                <TableCell>{lead.phone}</TableCell>
-                                <TableCell>{lead.email}</TableCell>
-                                <TableCell>{lead.subject}</TableCell>
+                        {items.map((contact) => (
+                            <TableRow key={contact._id} hover>
+                                <TableCell>{contact.name}</TableCell>
+                                <TableCell>{contact.phone}</TableCell>
+                                <TableCell>{contact.email}</TableCell>
+                                <TableCell>{contact.subject}</TableCell>
                                 <TableCell>
-                                    <Chip size="small" label={lead.status} color={lead.status === 'Mới' ? 'primary' : 'success'} />
+                                    <Chip
+                                        size="small"
+                                        label={getStatusLabel(contact.status)}
+                                        color={getStatusColor(contact.status) as any}
+                                    />
                                 </TableCell>
-                                <TableCell>{lead.createdAt}</TableCell>
+                                <TableCell>
+                                    <Chip
+                                        size="small"
+                                        label={contact.priority === 'high' ? 'Cao' : contact.priority === 'medium' ? 'Trung bình' : 'Thấp'}
+                                        color={contact.priority === 'high' ? 'error' : contact.priority === 'medium' ? 'warning' : 'default'}
+                                    />
+                                </TableCell>
+                                <TableCell>{new Date(contact.createdAt).toLocaleDateString('vi-VN')}</TableCell>
                                 <TableCell align="right">
-                                    <Chip label="Xem" onClick={() => navigate(`/admin/customers/${lead.id}`)} />
+                                    <Button size="small" onClick={() => navigate(`/admin/customers/${contact._id}`)}>
+                                        Xem
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        color="error"
+                                        onClick={() => handleDelete(contact._id)}
+                                    >
+                                        Xóa
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
-            </TableContainer>
+            </Paper>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Pagination count={pages} page={page} onChange={(_, p) => setPage(p)} />
+            </Box>
+
+            <Snackbar
+                open={toast.open}
+                autoHideDuration={3000}
+                onClose={() => setToast({ ...toast, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert severity={toast.severity} variant="filled" onClose={() => setToast({ ...toast, open: false })}>
+                    {toast.message}
+                </Alert>
+            </Snackbar>
         </AdminLayout>
     );
 };

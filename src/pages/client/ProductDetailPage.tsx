@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -12,6 +12,8 @@ import {
     Card,
     CardContent,
     Rating,
+    CircularProgress,
+    Alert,
     // Divider
 } from '@mui/material';
 import {
@@ -23,17 +25,59 @@ import {
 } from '@mui/icons-material';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/shared/Layout';
-import { getProductById, MOCK_PRODUCTS } from '../../data/mockProducts';
+import { get_product } from '../../api/client/products';
+import { Product } from '../../api/client/products';
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const product = id ? getProductById(parseInt(id)) : null;
+    const [product, setProduct] = useState<Product | null>(null);
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+    const [ratingAvg, setRatingAvg] = useState(0);
+    const [reviewsCount, setReviewsCount] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState(0);
 
-    if (!product) {
+    useEffect(() => {
+        const loadProduct = async () => {
+            if (!id) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await get_product(id);
+                setProduct(response.data.product);
+                setRelatedProducts(response.data.related || []);
+                setRatingAvg(response.data.ratingAvg || 0);
+                setReviewsCount(response.data.reviewsCount || 0);
+            } catch (err) {
+                console.error('Error loading product:', err);
+                setError('Không thể tải thông tin sản phẩm');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProduct();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <Layout>
+                <Box className="container" sx={{ mt: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+                    <CircularProgress />
+                </Box>
+            </Layout>
+        );
+    }
+
+    if (error || !product) {
         return (
             <Layout>
                 <Box className="container" sx={{ mt: 3 }}>
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error || 'Sản phẩm không tồn tại'}
+                    </Alert>
                     <Typography variant="h4" component="h1">
                         Sản phẩm không tồn tại
                     </Typography>
@@ -45,12 +89,10 @@ const ProductDetailPage: React.FC = () => {
         );
     }
 
-    // Mock data for product details
-    const productImages = [
-        product.image,
-        product.image, // In real app, these would be different images
-        product.image
-    ];
+    // Product images from API
+    const productImages = product.images && product.images.length > 0
+        ? product.images
+        : ['/placeholder-product.jpg'];
 
     const productAttributes = [
         { label: 'Màu sắc', value: 'Bạc' },
@@ -60,12 +102,10 @@ const ProductDetailPage: React.FC = () => {
     ];
 
     const qualityMetrics = [
-        { label: 'Chất lượng sản phẩm', rating: 5.0 },
+        { label: 'Chất lượng sản phẩm', rating: ratingAvg },
         { label: 'Tốc độ giao hàng', rating: 5.0 },
         { label: 'Bảo hành dịch vụ', rating: 5.0 }
     ];
-
-    const relatedProducts = MOCK_PRODUCTS.slice(0, 5);
 
     return (
         <Layout>
@@ -75,8 +115,8 @@ const ProductDetailPage: React.FC = () => {
                     <MuiLink component={Link} to="/" color="inherit">
                         Trang chủ
                     </MuiLink>
-                    <MuiLink component={Link} to="/categories" color="inherit">
-                        Thiết bị khác
+                    <MuiLink component={Link} to={`/categories/${product.category.slug}`} color="inherit">
+                        {product.category.name}
                     </MuiLink>
                     <Typography color="text.primary">{product.name}</Typography>
                 </Breadcrumbs>
@@ -136,10 +176,16 @@ const ProductDetailPage: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                                 <StarIcon sx={{ color: '#ffb400', fontSize: 20 }} />
                                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                                    {product.rating}
+                                    {ratingAvg.toFixed(1)}
                                 </Typography>
                                 <Typography sx={{ color: '#666' }}>•</Typography>
-                                <Typography sx={{ color: '#666' }}>Đã bán: {product.sold}</Typography>
+                                <Typography sx={{ color: '#666' }}>Đánh giá: {reviewsCount}</Typography>
+                                {product.sold && (
+                                    <>
+                                        <Typography sx={{ color: '#666' }}>•</Typography>
+                                        <Typography sx={{ color: '#666' }}>Đã bán: {product.sold}</Typography>
+                                    </>
+                                )}
                             </Box>
 
                             {/* Product Title */}
@@ -164,7 +210,7 @@ const ProductDetailPage: React.FC = () => {
 
                             {/* Pricing */}
                             <Box sx={{ mb: 3 }}>
-                                {product.priceOriginal && (
+                                {product.originalPrice && (
                                     <Typography
                                         sx={{
                                             color: '#999',
@@ -173,7 +219,7 @@ const ProductDetailPage: React.FC = () => {
                                             mb: 1
                                         }}
                                     >
-                                        {product.priceOriginal}₫
+                                        {product.originalPrice.toLocaleString('vi-VN')}₫
                                     </Typography>
                                 )}
                                 <Typography
@@ -184,8 +230,18 @@ const ProductDetailPage: React.FC = () => {
                                         mb: 2
                                     }}
                                 >
-                                    {product.priceCurrent === 'Liên hệ' ? product.priceCurrent : `${product.priceCurrent}₫`}
+                                    {product.price.toLocaleString('vi-VN')}₫
                                 </Typography>
+                                {product.discountPercentage && product.discountPercentage > 0 && (
+                                    <Chip
+                                        label={`Giảm ${product.discountPercentage}%`}
+                                        sx={{
+                                            backgroundColor: '#ff4444',
+                                            color: 'white',
+                                            fontWeight: 600
+                                        }}
+                                    />
+                                )}
                             </Box>
 
                             {/* Product Attributes */}
@@ -209,50 +265,78 @@ const ProductDetailPage: React.FC = () => {
                             </Box>
 
                             {/* Purchase Options */}
-                            <Box sx={{ mb: 3 }}>
-                                <Typography sx={{ mb: 2, fontWeight: 600 }}>Mua hàng tại:</Typography>
-                                <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                                    <Button
-                                        variant="outlined"
-                                        sx={{
-                                            borderColor: '#f58220',
-                                            color: '#f58220',
-                                            '&:hover': {
-                                                borderColor: '#f58220',
-                                                backgroundColor: '#fff5f0'
-                                            }
-                                        }}
-                                    >
-                                        Shopee
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        sx={{
-                                            borderColor: '#f58220',
-                                            color: '#f58220',
-                                            '&:hover': {
-                                                borderColor: '#f58220',
-                                                backgroundColor: '#fff5f0'
-                                            }
-                                        }}
-                                    >
-                                        TikTok
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        sx={{
-                                            borderColor: '#f58220',
-                                            color: '#f58220',
-                                            '&:hover': {
-                                                borderColor: '#f58220',
-                                                backgroundColor: '#fff5f0'
-                                            }
-                                        }}
-                                    >
-                                        GIGA.vn
-                                    </Button>
+                            {product.purchaseLinks && (
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography sx={{ mb: 2, fontWeight: 600 }}>Mua hàng tại:</Typography>
+                                    <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                                        {product.purchaseLinks.shopee && (
+                                            <Button
+                                                variant="outlined"
+                                                sx={{
+                                                    borderColor: '#f58220',
+                                                    color: '#f58220',
+                                                    '&:hover': {
+                                                        borderColor: '#f58220',
+                                                        backgroundColor: '#fff5f0'
+                                                    }
+                                                }}
+                                                onClick={() => window.open(product.purchaseLinks!.shopee, '_blank')}
+                                            >
+                                                Shopee
+                                            </Button>
+                                        )}
+                                        {product.purchaseLinks.tiktok && (
+                                            <Button
+                                                variant="outlined"
+                                                sx={{
+                                                    borderColor: '#f58220',
+                                                    color: '#f58220',
+                                                    '&:hover': {
+                                                        borderColor: '#f58220',
+                                                        backgroundColor: '#fff5f0'
+                                                    }
+                                                }}
+                                                onClick={() => window.open(product.purchaseLinks!.tiktok, '_blank')}
+                                            >
+                                                TikTok
+                                            </Button>
+                                        )}
+                                        {product.purchaseLinks.facebook && (
+                                            <Button
+                                                variant="outlined"
+                                                sx={{
+                                                    borderColor: '#f58220',
+                                                    color: '#f58220',
+                                                    '&:hover': {
+                                                        borderColor: '#f58220',
+                                                        backgroundColor: '#fff5f0'
+                                                    }
+                                                }}
+                                                onClick={() => window.open(product.purchaseLinks!.facebook, '_blank')}
+                                            >
+                                                Facebook
+                                            </Button>
+                                        )}
+                                        {product.purchaseLinks.custom?.map((link, index) => (
+                                            <Button
+                                                key={index}
+                                                variant="outlined"
+                                                sx={{
+                                                    borderColor: '#f58220',
+                                                    color: '#f58220',
+                                                    '&:hover': {
+                                                        borderColor: '#f58220',
+                                                        backgroundColor: '#fff5f0'
+                                                    }
+                                                }}
+                                                onClick={() => window.open(link.url, '_blank')}
+                                            >
+                                                {link.platform}
+                                            </Button>
+                                        ))}
+                                    </Box>
                                 </Box>
-                            </Box>
+                            )}
 
                             {/* Action Buttons */}
                             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -313,8 +397,7 @@ const ProductDetailPage: React.FC = () => {
                             Mô tả sản phẩm
                         </Typography>
                         <Typography sx={{ lineHeight: 1.8, color: '#666' }}>
-                            {product.name} là sản phẩm chất lượng cao với thiết kế hiện đại và tiện ích vượt trội.
-                            Sản phẩm được làm từ chất liệu thép và nhựa PP cao cấp, đảm bảo độ bền và an toàn cho người sử dụng.
+                            {product.description || `${product.name} là sản phẩm chất lượng cao với thiết kế hiện đại và tiện ích vượt trội.`}
                         </Typography>
                     </Box>
 
@@ -358,27 +441,25 @@ const ProductDetailPage: React.FC = () => {
                     </Box>
                 </Box>
 
-                {/* Expandable Sections */}
-                <Box sx={{ mb: 4 }}>
-                    {[
-                        'Trong hộp có gì?',
-                        'Thông số kỹ thuật',
-                        'Hướng dẫn sử dụng',
-                        'Bảo dưỡng vệ sinh và lưu ý',
-                        'Tài liệu sử dụng'
-                    ].map((title, index) => (
-                        <Accordion key={index} sx={{ mb: 1 }}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography sx={{ fontWeight: 600 }}>{title}</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Typography>
-                                    Nội dung chi tiết cho {title.toLowerCase()} sẽ được cập nhật...
-                                </Typography>
-                            </AccordionDetails>
-                        </Accordion>
-                    ))}
-                </Box>
+                {/* Additional Information Sections */}
+                {product.additionalInfo && product.additionalInfo.length > 0 && (
+                    <Box sx={{ mb: 4 }}>
+                        {product.additionalInfo
+                            .sort((a, b) => (a.order || 0) - (b.order || 0))
+                            .map((info, index) => (
+                                <Accordion key={index} sx={{ mb: 1 }}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                        <Typography sx={{ fontWeight: 600 }}>{info.title}</Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                            {info.content}
+                                        </Typography>
+                                    </AccordionDetails>
+                                </Accordion>
+                            ))}
+                    </Box>
+                )}
 
                 {/* Related Products */}
                 <Box sx={{ mb: 4 }}>
@@ -396,7 +477,7 @@ const ProductDetailPage: React.FC = () => {
                     }}>
                         {relatedProducts.map((relatedProduct) => (
                             <Card
-                                key={relatedProduct.id}
+                                key={relatedProduct._id}
                                 sx={{
                                     height: '100%',
                                     '&:hover': {
@@ -406,11 +487,11 @@ const ProductDetailPage: React.FC = () => {
                                     transition: 'all 0.2s ease',
                                     cursor: 'pointer'
                                 }}
-                                onClick={() => window.location.href = `/products/${relatedProduct.id}`}
+                                onClick={() => window.location.href = `/products/${relatedProduct.slug}`}
                             >
                                 <Box
                                     component="img"
-                                    src={relatedProduct.image}
+                                    src={relatedProduct.images?.[0] || '/placeholder-product.jpg'}
                                     alt={relatedProduct.name}
                                     sx={{
                                         width: '100%',
@@ -439,10 +520,12 @@ const ProductDetailPage: React.FC = () => {
                                     </Typography>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                         <StarIcon sx={{ color: '#ffb400', fontSize: 16 }} />
-                                        <Typography variant="body2">{relatedProduct.rating}</Typography>
-                                        <Typography variant="body2" sx={{ color: '#666' }}>
-                                            Đã bán: {relatedProduct.sold}
-                                        </Typography>
+                                        <Typography variant="body2">{relatedProduct.ratingAvg?.toFixed(1) || '0.0'}</Typography>
+                                        {relatedProduct.sold && (
+                                            <Typography variant="body2" sx={{ color: '#666' }}>
+                                                Đã bán: {relatedProduct.sold}
+                                            </Typography>
+                                        )}
                                     </Box>
                                     <Typography
                                         variant="h6"
@@ -452,10 +535,7 @@ const ProductDetailPage: React.FC = () => {
                                             fontSize: 16
                                         }}
                                     >
-                                        {relatedProduct.priceCurrent === 'Liên hệ'
-                                            ? relatedProduct.priceCurrent
-                                            : `${relatedProduct.priceCurrent}₫`
-                                        }
+                                        {relatedProduct.price.toLocaleString('vi-VN')}₫
                                     </Typography>
                                 </CardContent>
                             </Card>

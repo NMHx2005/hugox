@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
+import api from '../../api';
 
 const GOOGLE_MAP_EMBED =
     'https://www.google.com/maps?q=27%20%C4%90o%C3%A0n%20Th%E1%BB%8B%20%C4%90i%E1%BB%83m%20-%20Ph%C6%B0%E1%BB%9Dng%20S%C3%B4ng%20C%E1%BA%A7u%20-%20D%C4%83k%20L%C4%83k&output=embed';
@@ -25,7 +25,7 @@ const ContactPage: React.FC = () => {
 
     const onSubmit = async (data: ContactFormData) => {
         try {
-            await axios.post('/api/contact', data);
+            await api.post('/contact', data);
             alert('Gửi liên hệ thành công!');
         } catch {
             alert('Đã có lỗi xảy ra!');

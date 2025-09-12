@@ -6,23 +6,15 @@ import {
     Email,
     ArrowUpward,
 } from '@mui/icons-material';
+import { useAppContext } from '../../hooks/useAppContext';
 
 
 const Footer: React.FC = () => {
+    const { categories, generalSettings, contactSettings, loading } = useAppContext();
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-
-    const featuredCategories = [
-        'Điện gia dụng',
-        'Quạt',
-        'Máy hút ẩm',
-        'Thiết bị nhà bếp',
-        'Sức khoẻ & làm đẹp',
-        'Máy lọc không khí',
-        'Đèn bắt muỗi',
-        'Thiết bị khác'
-    ];
 
     const customerSupport = [
         'Giới thiệu',
@@ -68,12 +60,12 @@ const Footer: React.FC = () => {
                     }}
                 >
                     {/* Logo */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, marginBottom: 1.5 }}>
                         <Box
                             component="img"
-                            src="/logo-removebg-preview.png"
-                            alt="Lumias logo"
-                            sx={{ width: 200, height: 70 }}
+                            src={generalSettings?.logo || "/logo-removebg-preview.png"}
+                            alt={generalSettings?.siteName || "Lumias logo"}
+                            sx={{ height: 70, textAlign: 'center' }}
                         />
                         <Typography
                             variant="h5"
@@ -84,7 +76,7 @@ const Footer: React.FC = () => {
                                 fontFamily: 'Roboto, sans-serif'
                             }}
                         >
-
+                            {/* {generalSettings?.siteName || ''} */}
                         </Typography>
                     </Box>
 
@@ -175,9 +167,9 @@ const Footer: React.FC = () => {
                         Danh mục nổi bật
                     </Typography>
                     <Box component="ul" sx={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                        {featuredCategories.map((category, index) => (
+                        {!loading && categories.map((category) => (
                             <Box
-                                key={index}
+                                key={category._id}
                                 component="li"
                                 sx={{
                                     marginBottom: 1.75,
@@ -187,7 +179,7 @@ const Footer: React.FC = () => {
                                     '&:hover': { color: '#f58220' }
                                 }}
                             >
-                                {category}
+                                {category.name}
                             </Box>
                         ))}
                     </Box>
@@ -252,26 +244,24 @@ const Footer: React.FC = () => {
                     </Typography>
 
                     <Typography sx={{ margin: '0 0 16px 0', lineHeight: 1.5, color: '#fff' }}>
-                        HUGOX – Thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh,
-                        không dây và không giới hạn.
+                        {generalSettings?.siteDescription || 'HUGOX – Thương hiệu hàng đầu cung cấp hệ sinh thái đầy đủ sản phẩm về gia dụng thông minh, không dây và không giới hạn.'}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
                         <LocationOn sx={{ marginRight: 1, fontSize: '16px' }} />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Địa chỉ: 27 Đoàn Thị Điểm - Phường Sông Cầu - Dăk Lăk
+                            Địa chỉ: {contactSettings?.address || '27 Đoàn Thị Điểm - Phường Sông Cầu - Dăk Lăk'}
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
                         <Phone sx={{ marginRight: 1, fontSize: '16px' }} />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Hotline mua hàng: 08.7878.4842
+                            Hotline mua hàng: {contactSettings?.phone || '08.7878.4842'}
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
-                        {/* <ZaloIcon size={16} /> */}
                         <Box
                             component="img"
                             src="/zalo_logo.jpg"
@@ -279,12 +269,11 @@ const Footer: React.FC = () => {
                             sx={{ width: 20, height: 20 }}
                         />
                         <Typography sx={{ fontSize: '14px', color: '#fff', marginLeft: 1 }}>
-                            Zalo mua hàng: 08.7878.4842
+                            Zalo mua hàng: {contactSettings?.phone || '08.7878.4842'}
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, color: '#fff' }}>
-                        {/* <ZaloIcon size={16} /> */}
                         <Box
                             component="img"
                             src="/zalo_logo.jpg"
@@ -292,14 +281,14 @@ const Footer: React.FC = () => {
                             sx={{ width: 20, height: 20 }}
                         />
                         <Typography sx={{ fontSize: '14px', color: '#fff', marginLeft: 1 }}>
-                            Zalo bảo hành: 0876.83.63.43
+                            Zalo bảo hành: {contactSettings?.phone || '0876.83.63.43'}
                         </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', color: '#fff' }}>
                         <Email sx={{ marginRight: 1, fontSize: '16px' }} />
                         <Typography sx={{ fontSize: '14px', color: '#fff' }}>
-                            Email: Hugodigital2003@gmail.com
+                            Email: {contactSettings?.email || 'Hugodigital2003@gmail.com'}
                         </Typography>
                     </Box>
                 </Box>
@@ -336,7 +325,7 @@ const Footer: React.FC = () => {
                         alignItems: 'center',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
-                    onClick={() => window.open('tel:0878784842', '_self')}
+                    onClick={() => window.open(`tel:${contactSettings?.phone || '0878784842'}`, '_self')}
                 >
                     <Phone sx={{ fontSize: '24px', marginBottom: 0.5, color: '#f58220' }} />
                     <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#000' }}>
@@ -357,11 +346,11 @@ const Footer: React.FC = () => {
                         alignItems: 'center',
                         '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
-                    onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
+                    onClick={() => window.open(`https://zalo.me/${contactSettings?.phone || '0878784842'}`, '_blank')}
                 >
                     <Box
                         component="img"
-                        src="zalo_logo.jpg"
+                        src="/zalo_logo.jpg"
                         alt="Zalo"
                         sx={{ width: 20, height: 20 }}
                     />

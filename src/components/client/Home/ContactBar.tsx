@@ -1,8 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Phone, ArrowUpward } from '@mui/icons-material';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 const ContactBar: React.FC = () => {
+    const { contactSettings } = useAppContext();
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -41,7 +44,7 @@ const ContactBar: React.FC = () => {
                         backgroundColor: '#f5f5f5'
                     }
                 }}
-                onClick={() => window.open('tel:0878784842', '_self')}
+                onClick={() => window.open(`tel:${contactSettings?.phone || '0878784842'}`, '_self')}
             >
                 <Phone sx={{ fontSize: { xs: '16px', sm: '18px', md: '20px' }, color: '#f58220' }} />
                 <Typography sx={{ fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit' }}>
@@ -66,7 +69,7 @@ const ContactBar: React.FC = () => {
                         backgroundColor: '#f5f5f5'
                     }
                 }}
-                onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
+                onClick={() => window.open(`https://zalo.me/${contactSettings?.phone || '0878784842'}`, '_blank')}
             >
                 <Box
                     component="img"

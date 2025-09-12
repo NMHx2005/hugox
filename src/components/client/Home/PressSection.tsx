@@ -1,15 +1,14 @@
-import React from 'react';
-import { Box, Typography, Button, Card, CardMedia, CardContent } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, Card, CardMedia, CardContent, CircularProgress, Alert, IconButton } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { get_featured_news, NewsArticle } from '../../../api/client/news';
 
 interface PressArticleProps {
-    source: string;
-    title: string;
-    description: string;
-    image: string;
-    link: string;
+    article: NewsArticle;
 }
 
-const PressArticle: React.FC<PressArticleProps> = ({ source, title, description, image, link }) => {
+const PressArticle: React.FC<PressArticleProps> = ({ article }) => {
     return (
         <Card
             sx={{
@@ -30,8 +29,8 @@ const PressArticle: React.FC<PressArticleProps> = ({ source, title, description,
             <CardMedia
                 component="img"
                 height="200"
-                image={image}
-                alt={title}
+                image={article.featuredImage || '/placeholder.jpg'}
+                alt={article.title}
                 sx={{
                     objectFit: 'cover',
                 }}
@@ -47,7 +46,7 @@ const PressArticle: React.FC<PressArticleProps> = ({ source, title, description,
                         marginBottom: { xs: 1.5, sm: 1.8, md: 2 },
                     }}
                 >
-                    {source}
+                    {article.category}
                 </Typography>
 
                 <Typography
@@ -61,7 +60,7 @@ const PressArticle: React.FC<PressArticleProps> = ({ source, title, description,
                         flexGrow: 1,
                     }}
                 >
-                    {title}
+                    {article.title}
                 </Typography>
 
                 <Typography
@@ -76,10 +75,12 @@ const PressArticle: React.FC<PressArticleProps> = ({ source, title, description,
                         overflow: 'hidden',
                     }}
                 >
-                    {description}
+                    {article.excerpt}
                 </Typography>
 
                 <Button
+                    component={Link}
+                    to={`/news/${article.slug}`}
                     variant="contained"
                     sx={{
                         backgroundColor: '#000',
@@ -94,7 +95,6 @@ const PressArticle: React.FC<PressArticleProps> = ({ source, title, description,
                             backgroundColor: '#333',
                         },
                     }}
-                    href={link}
                 >
                     Xem chi tiết
                 </Button>
@@ -104,29 +104,60 @@ const PressArticle: React.FC<PressArticleProps> = ({ source, title, description,
 };
 
 const PressSection: React.FC = () => {
-    const articles = [
-        {
-            source: 'VNEXPRESS',
-            title: 'Lumias - máy hút ẩm gia đình hiệu suất cao',
-            description: 'Chuyên gia công nghệ đánh giá máy hút ẩm Lumias có hiệu suất tốt so với tầm giá cùng bình chứa dung tích lớn, độ ồn không quá 56 dB, ít ảnh hưởng giấc ngủ.',
-            image: '/bao-vnexpress-1.jpg',
-            link: '#',
-        },
-        {
-            source: 'ONLINE / VTV.vn',
-            title: 'Hợp Long trở thành nhà phân phối độc quyền máy hút ẩm NWT và thương hiệu Lumias ở Việt Nam',
-            description: 'VTV.vn - Từ nay, người dùng Việt có thể chọn mua máy hút ẩm NWT và các sản phẩm Lumias qua hệ thống phân phối độc quyền của Hợp Long (gigadigital.vn)',
-            image: '/bao-vnexpress-1.jpg',
-            link: '#',
-        },
-        {
-            source: 'Tinhte.vn',
-            title: 'Review nhanh máy hút ẩm Lumias LMD-20L',
-            description: 'Trong bài viết này, mình sẽ chia sẻ về máy hút ẩm Lumias LMD-20L, từ thiết kế, tính năng, cho đến hiệu suất hoạt động thực tế...',
-            image: '/bao-vnexpress-1.jpg',
-            link: '#',
-        },
-    ];
+    const [articles, setArticles] = useState<NewsArticle[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [itemsPerView, setItemsPerView] = useState(3);
+
+    useEffect(() => {
+        loadFeaturedNews();
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 600) {
+                setItemsPerView(1);
+            } else if (window.innerWidth < 960) {
+                setItemsPerView(2);
+            } else {
+                setItemsPerView(3);
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const loadFeaturedNews = async () => {
+        try {
+            setLoading(true);
+            const data = await get_featured_news(6); // Load 6 featured news articles
+            // get_featured_news already returns an array, so we can use it directly
+            setArticles(data);
+        } catch (error) {
+            console.error('Error loading featured news:', error);
+            setError('Lỗi tải tin tức nổi bật');
+            setArticles([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const maxSlides = Math.max(0, Math.ceil(articles.length / itemsPerView) - 1);
+
+    const nextSlide = () => {
+        setCurrentSlide(prev => Math.min(prev + 1, maxSlides));
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide(prev => Math.max(prev - 1, 0));
+    };
+
+    const goToSlide = (slideIndex: number) => {
+        setCurrentSlide(slideIndex);
+    };
 
     return (
         <div className='press-section' style={{ backgroundColor: '#FFFFFF', padding: '60px 0' }}>
@@ -158,22 +189,141 @@ const PressSection: React.FC = () => {
                     </Typography>
                 </Box>
 
-                {/* Articles Grid */}
-                <Box
-                    sx={{
-                        display: 'grid',
-                        gridTemplateColumns: {
-                            xs: '1fr',
-                            sm: 'repeat(2, 1fr)',
-                            md: 'repeat(3, 1fr)',
-                        },
-                        gap: { xs: 3, sm: 3.5, md: 4 },
-                    }}
-                >
-                    {articles.map((article, index) => (
-                        <PressArticle key={index} {...article} />
-                    ))}
-                </Box>
+                {/* Articles Slider */}
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+                        <CircularProgress />
+                    </Box>
+                ) : error ? (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                ) : articles.length > 0 ? (
+                    <Box sx={{ position: 'relative' }}>
+                        {/* Navigation Buttons */}
+                        <IconButton
+                            onClick={prevSlide}
+                            disabled={currentSlide === 0}
+                            sx={{
+                                position: 'absolute',
+                                left: { xs: -10, sm: -20 },
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 2,
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                                },
+                                '&:disabled': {
+                                    opacity: 0.3,
+                                },
+                            }}
+                        >
+                            <ChevronLeft />
+                        </IconButton>
+
+                        <IconButton
+                            onClick={nextSlide}
+                            disabled={currentSlide === maxSlides}
+                            sx={{
+                                position: 'absolute',
+                                right: { xs: -10, sm: -20 },
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 2,
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                                },
+                                '&:disabled': {
+                                    opacity: 0.3,
+                                },
+                            }}
+                        >
+                            <ChevronRight />
+                        </IconButton>
+
+                        {/* Slider Container */}
+                        <Box
+                            sx={{
+                                overflow: 'hidden',
+                                borderRadius: '12px',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    transform: `translateX(-${currentSlide * 100}%)`,
+                                    transition: 'transform 0.3s ease-in-out',
+                                }}
+                            >
+                                {Array.from({ length: maxSlides + 1 }, (_, slideIndex) => (
+                                    <Box
+                                        key={slideIndex}
+                                        sx={{
+                                            minWidth: '100%',
+                                            display: 'flex',
+                                            gap: { xs: 2, sm: 3, md: 4 },
+                                            padding: { xs: '0 16px', sm: '0 24px' },
+                                        }}
+                                    >
+                                        {articles
+                                            .slice(slideIndex * itemsPerView, (slideIndex + 1) * itemsPerView)
+                                            .map((article) => (
+                                                <Box
+                                                    key={article._id}
+                                                    sx={{
+                                                        flex: `0 0 ${100 / itemsPerView}%`,
+                                                        maxWidth: `${100 / itemsPerView}%`,
+                                                    }}
+                                                >
+                                                    <PressArticle article={article} />
+                                                </Box>
+                                            ))}
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Box>
+
+                        {/* Dots Indicator */}
+                        {maxSlides > 0 && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: 1,
+                                    mt: 3,
+                                }}
+                            >
+                                {Array.from({ length: maxSlides + 1 }, (_, index) => (
+                                    <Box
+                                        key={index}
+                                        onClick={() => goToSlide(index)}
+                                        sx={{
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            backgroundColor: currentSlide === index ? '#f58220' : '#ddd',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.3s ease',
+                                            '&:hover': {
+                                                backgroundColor: currentSlide === index ? '#e6731a' : '#bbb',
+                                            },
+                                        }}
+                                    />
+                                ))}
+                            </Box>
+                        )}
+                    </Box>
+                ) : (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography variant="h6" color="text.secondary">
+                            Chưa có tin tức nổi bật nào
+                        </Typography>
+                    </Box>
+                )}
             </Box>
         </div>
     );

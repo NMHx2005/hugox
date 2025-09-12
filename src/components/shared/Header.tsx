@@ -1,124 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppBar, Toolbar, Box, IconButton } from '@mui/material';
-import { Search as SearchIcon, Menu as MenuIcon, KeyboardArrowDown as KeyboardArrowDown } from '@mui/icons-material';
+import { AppBar, Toolbar, Box, IconButton, Typography, Avatar } from '@mui/material';
+import { Search as SearchIcon, Menu as MenuIcon } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import TrendingBar from '../client/Home/TrendingBar';
-// import api from '../../api'; // tạm thời không gọi API thật
+import { useAppContext } from '../../hooks/useAppContext';
+import { get_products_by_category } from '../../api/client/products';
 
 const Header: React.FC = () => {
+    const { categories, generalSettings, loading } = useAppContext();
+
     const [isScrolled, setIsScrolled] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
     // Hover dropdown state
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isLinhKienMenuOpen, setIsLinhKienMenuOpen] = useState(false);
+    const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+    const [categoryProducts, setCategoryProducts] = useState<{ [key: string]: any[] }>({});
+    const [loadingProducts, setLoadingProducts] = useState(false);
     const triggerRef = useRef<HTMLDivElement | null>(null);
-    const linhKienTriggerRef = useRef<HTMLDivElement | null>(null);
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Mock API response - danh sách sản phẩm cho dropdown (tạm thời cố định dữ liệu)
-    const MOCK_API_PRODUCTS = [
-        // Cột trái
-        'Máy Xay Sinh Tố Công Nghiệp',
-        'Máy Ép Chậm',
-        'Máy làm sữa hạt',
-        'Máy xay thịt',
-        'Nồi Áp Suất',
-        'Nồi & Chảo',
-        'Nồi chiên Hấp đa năng',
-        'Dụng cụ nhà bếp',
-        // Cột phải
-        'Máy Xay Sinh Tố',
-        'Máy Ép Nhanh',
-        'Máy Vắt Cam',
-        'Bình Thuỷ Điện',
-        'Nồi Cơm Điện',
-        'Nồi Chiên Không Dầu',
-        'Bếp Từ - Hồng Ngoại'
-    ];
+    // Load products for category
+    const loadCategoryProducts = async (categorySlug: string) => {
+        if (categoryProducts[categorySlug]) return; // Already loaded
 
-    // Mock API response - danh sách linh kiện thay thế cho dropdown
-    const MOCK_LINH_KIEN_PRODUCTS = [
-        'Linh kiện máy xay sữa hạt',
-        'Linh kiện máy ép trái cây',
-        'Linh kiện máy xay sinh tố'
-    ];
-
-    // Categories for inline navigation (vẫn giữ để hiển thị inline)
-    const MOCK_API_CATEGORIES = [
-        { id: 'appliances', name: 'Điện gia dụng', slug: 'appliances' },
-        { id: 'dehumidifier', name: 'Máy hút ẩm', slug: 'dehumidifier' },
-        { id: 'fans', name: 'Quạt', slug: 'fans' },
-        { id: 'kitchen', name: 'Thiết bị nhà bếp', slug: 'kitchen' },
-        { id: 'health-beauty', name: 'Sức khoẻ & Làm đẹp', slug: 'health-beauty' },
-        { id: 'linh-kien-thay-the', name: 'Linh kiện thay thế', slug: 'linh-kien-thay-the' },
-        { id: 'others', name: 'Thiết bị khác', slug: 'others' },
-    ];
-
-    const categories = MOCK_API_CATEGORIES;
-    const products = MOCK_API_PRODUCTS;
-
-    // Mobile menu model (2-level)
-    const mobileMenuItems = [
-        { label: 'Trang chủ', to: '/' },
-        { label: 'Giới thiệu', to: '/about' },
-        { label: 'Mới & Nổi Bật', to: '/featured' },
-        {
-            label: 'Điện gia dụng',
-            children: [
-                { label: 'Máy Xay Sinh Tố Công Nghiệp', slug: 'may-xay-sinh-to-cong-nghiep' },
-                { label: 'Máy Ép Chậm', slug: 'may-ep-cham' },
-                { label: 'Máy làm sữa hạt', slug: 'may-lam-sua-hat' },
-                { label: 'Máy xay thịt', slug: 'may-xay-thit' },
-            ],
-        },
-        { label: 'Máy hút ẩm', to: '/categories/dehumidifier' },
-        { label: 'Quạt', to: '/categories/fans' },
-        {
-            label: 'Thiết bị nhà bếp',
-            children: [
-                { label: 'Nồi Áp Suất', slug: 'noi-ap-suat' },
-                { label: 'Nồi & Chảo', slug: 'noi-chao' },
-                { label: 'Nồi chiên Hấp đa năng', slug: 'noi-chien-hap-da-nang' },
-                { label: 'Dụng cụ nhà bếp', slug: 'dung-cu-nha-bep' },
-            ],
-        },
-        { label: 'Sức khoẻ & Làm đẹp', to: '/categories/health-beauty' },
-        {
-            label: 'Linh kiện thay thế',
-            children: [
-                { label: 'Linh kiện máy xay sữa hạt', slug: 'linh-kien-may-xay-sua-hat' },
-                { label: 'Linh kiện máy ép trái cây', slug: 'linh-kien-may-ep-trai-cay' },
-                { label: 'Linh kiện máy xay sinh tố', slug: 'linh-kien-may-xay-sinh-to' },
-            ],
-        },
-        { label: 'Thiết bị khác', to: '/categories/others' },
-        // { label: 'Reviews', to: '/reviews' },
-        // { label: 'Tin tức', to: '/news' },
-        { label: 'Liên hệ', to: '/contact' },
-    ];
-
-    const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-    const toggleGroup = (label: string) => {
-        setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
+        try {
+            setLoadingProducts(true);
+            const response = await get_products_by_category(categorySlug, { page: 1, limit: 6 });
+            const products = response.data?.products || [];
+            setCategoryProducts(prev => ({
+                ...prev,
+                [categorySlug]: products
+            }));
+        } catch (error) {
+            console.error('Error loading category products:', error);
+        } finally {
+            setLoadingProducts(false);
+        }
     };
-
-    // Simulate API fetch (để sẵn khung, hiện tại dùng dữ liệu mock)
-    // useEffect(() => {
-    //     let mounted = true;
-    //     (async () => {
-    //         try {
-    //             const res = await api.get('/categories');
-    //             const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
-    //             if (mounted) setCategories(data);
-    //         } catch {
-    //             // fallback giữ MOCK_API_CATEGORIES
-    //         }
-    //     })();
-    //     return () => { mounted = false; };
-    // }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -171,8 +92,8 @@ const Header: React.FC = () => {
                         <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'inherit' }}>
                             <Box
                                 component="img"
-                                src="/logo.jpg"
-                                alt="Lumias logo"
+                                src={generalSettings?.logo || "/logo.jpg"}
+                                alt={generalSettings?.siteName || "Lumias logo"}
                                 sx={{ width: 200, height: 70 }}
                             />
                         </Box>
@@ -194,8 +115,8 @@ const Header: React.FC = () => {
                         <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'inherit' }}>
                             <Box
                                 component="img"
-                                src="/logo.jpg"
-                                alt="Lumias logo"
+                                src={generalSettings?.logo || "/logo.jpg"}
+                                alt={generalSettings?.siteName || "Lumias logo"}
                                 sx={{ width: 200, height: 70 }}
                             />
                         </Box>
@@ -207,155 +128,119 @@ const Header: React.FC = () => {
                                     Mới & Nổi Bật
                                 </Link>
 
-                                {/* Render several categories inline from API (mock) */}
-                                {categories.slice(0, 3).map((c) => (
-                                    <Link key={c.id} to={`/categories/${c.slug || c.id}`} style={{ textDecoration: 'none', color: '#000', fontSize: '14px', fontWeight: 500 }}>
-                                        {c.name}
-                                    </Link>
+                                {/* Categories with product dropdowns */}
+                                {!loading && categories.slice(0, 6).map((category) => (
+                                    <Box
+                                        key={category._id}
+                                        sx={{ position: 'relative' }}
+                                        onMouseEnter={() => {
+                                            setHoveredCategory(category.slug);
+                                            loadCategoryProducts(category.slug);
+                                        }}
+                                        onMouseLeave={() => setHoveredCategory(null)}
+                                    >
+                                        <Link
+                                            to={`/categories/${category.slug}`}
+                                            style={{
+                                                textDecoration: 'none',
+                                                color: '#000',
+                                                fontSize: '14px',
+                                                fontWeight: 500,
+                                                display: 'block',
+                                                padding: '8px 0'
+                                            }}
+                                        >
+                                            {category.name}
+                                        </Link>
+
+                                        {/* Product dropdown */}
+                                        {hoveredCategory === category.slug && (
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: '100%',
+                                                    left: 0,
+                                                    backgroundColor: '#fff',
+                                                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                                    borderRadius: '8px',
+                                                    padding: 2,
+                                                    minWidth: '300px',
+                                                    zIndex: 1200,
+                                                }}
+                                                onMouseEnter={() => setHoveredCategory(category.slug)}
+                                                onMouseLeave={() => setHoveredCategory(null)}
+                                            >
+                                                <Typography variant="h6" sx={{ fontSize: '14px', fontWeight: 600, mb: 1, color: '#f58220' }}>
+                                                    {category.name}
+                                                </Typography>
+
+                                                {loadingProducts ? (
+                                                    <Typography sx={{ fontSize: '12px', color: '#666' }}>
+                                                        Đang tải...
+                                                    </Typography>
+                                                ) : categoryProducts[category.slug]?.length > 0 ? (
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                        {categoryProducts[category.slug].slice(0, 4).map((product) => (
+                                                            <Box
+                                                                key={product._id}
+                                                                component={Link}
+                                                                to={`/products/${product.slug}`}
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 1,
+                                                                    padding: '6px 8px',
+                                                                    borderRadius: '4px',
+                                                                    textDecoration: 'none',
+                                                                    color: 'inherit',
+                                                                    transition: 'background-color 0.2s ease',
+                                                                    '&:hover': {
+                                                                        backgroundColor: '#f8f9fa'
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Avatar
+                                                                    src={product.images?.[0]}
+                                                                    sx={{ width: 32, height: 32 }}
+                                                                    variant="rounded"
+                                                                />
+                                                                <Box>
+                                                                    <Typography sx={{ fontSize: '12px', fontWeight: 500, lineHeight: 1.2 }}>
+                                                                        {product.name}
+                                                                    </Typography>
+                                                                    <Typography sx={{ fontSize: '11px', color: '#f58220', fontWeight: 600 }}>
+                                                                        {product.price?.toLocaleString('vi-VN')}đ
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+                                                        ))}
+                                                        <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #eee' }}>
+                                                            <Link
+                                                                to={`/categories/${category.slug}`}
+                                                                style={{
+                                                                    fontSize: '12px',
+                                                                    color: '#f58220',
+                                                                    textDecoration: 'none',
+                                                                    fontWeight: 500
+                                                                }}
+                                                            >
+                                                                Xem tất cả →
+                                                            </Link>
+                                                        </Box>
+                                                    </Box>
+                                                ) : (
+                                                    <Typography sx={{ fontSize: '12px', color: '#666' }}>
+                                                        Chưa có sản phẩm
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        )}
+                                    </Box>
                                 ))}
 
-                                {/* Linh kiện thay thế dropdown */}
-                                <Box
-                                    sx={{ position: 'relative' }}
-                                    onMouseEnter={() => setIsLinhKienMenuOpen(true)}
-                                    onMouseLeave={() => setIsLinhKienMenuOpen(false)}
-                                >
-                                    <Box ref={linhKienTriggerRef} style={{ textDecoration: 'none', color: '#000', fontSize: '14px', fontWeight: 500, cursor: 'default' }}>
-                                        Linh kiện thay thế
-                                    </Box>
-                                    {isLinhKienMenuOpen && (
-                                        <Box
-                                            sx={{
-                                                position: 'absolute',
-                                                top: '100%',
-                                                left: 0,
-                                                backgroundColor: '#fff',
-                                                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                                                borderRadius: '8px',
-                                                padding: 2,
-                                                minWidth: '250px',
-                                                zIndex: 1200,
-                                            }}
-                                            onMouseEnter={() => setIsLinhKienMenuOpen(true)}
-                                            onMouseLeave={() => setIsLinhKienMenuOpen(false)}
-                                        >
-                                            {/* Hover buffer to avoid accidental close when moving from trigger to menu */}
-                                            <Box sx={{ position: 'absolute', top: -8, left: 0, right: 0, height: 8, backgroundColor: 'transparent' }} />
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                                {MOCK_LINH_KIEN_PRODUCTS.map((product, index) => (
-                                                    <Box
-                                                        key={index}
-                                                        component={Link}
-                                                        to={`/categories/${product.toLowerCase().replace(/\s+/g, '-').replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a').replace(/[èéẹẻẽêềếệểễ]/g, 'e').replace(/[ìíịỉĩ]/g, 'i').replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o').replace(/[ùúụủũưừứựửữ]/g, 'u').replace(/[ỳýỵỷỹ]/g, 'y').replace(/đ/g, 'd')}`}
-                                                        sx={{
-                                                            padding: '8px 12px',
-                                                            fontSize: '13px',
-                                                            cursor: 'pointer',
-                                                            borderRadius: '4px',
-                                                            transition: 'background-color 0.2s ease',
-                                                            textDecoration: 'none',
-                                                            color: 'inherit',
-                                                            display: 'block',
-                                                            '&:hover': {
-                                                                backgroundColor: '#f8f9fa',
-                                                                color: '#f58220'
-                                                            }
-                                                        }}
-                                                    >
-                                                        {product}
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        </Box>
-                                    )}
-                                </Box>
-
-                                {/* Hoverable dropdown - keep open when moving mouse into submenu */}
-                                <Box
-                                    sx={{ position: 'relative' }}
-                                    onMouseEnter={() => setIsMenuOpen(true)}
-                                    onMouseLeave={() => setIsMenuOpen(false)}
-                                >
-                                    <Box ref={triggerRef} style={{ textDecoration: 'none', color: '#000', fontSize: '14px', fontWeight: 500, cursor: 'default' }}>
-                                        Danh mục
-                                    </Box>
-                                    {isMenuOpen && (
-                                        <Box
-                                            sx={{
-                                                position: 'absolute',
-                                                top: '100%',
-                                                left: 0,
-                                                backgroundColor: '#fff',
-                                                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                                                borderRadius: '8px',
-                                                padding: 2,
-                                                minWidth: '400px',
-                                                display: 'grid',
-                                                gridTemplateColumns: '1fr 1fr',
-                                                gap: 1.5,
-                                                zIndex: 1200,
-                                            }}
-                                            onMouseEnter={() => setIsMenuOpen(true)}
-                                            onMouseLeave={() => setIsMenuOpen(false)}
-                                        >
-                                            {/* Hover buffer to avoid accidental close when moving from trigger to menu */}
-                                            <Box sx={{ position: 'absolute', top: -8, left: 0, right: 0, height: 8, backgroundColor: 'transparent' }} />
-                                            {/* Cột trái */}
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                                {products.slice(0, 8).map((product, index) => (
-                                                    <Box
-                                                        key={index}
-                                                        component={Link}
-                                                        to={`/categories/${product.toLowerCase().replace(/\s+/g, '-').replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a').replace(/[èéẹẻẽêềếệểễ]/g, 'e').replace(/[ìíịỉĩ]/g, 'i').replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o').replace(/[ùúụủũưừứựửữ]/g, 'u').replace(/[ỳýỵỷỹ]/g, 'y').replace(/đ/g, 'd')}`}
-                                                        sx={{
-                                                            padding: '8px 12px',
-                                                            fontSize: '13px',
-                                                            cursor: 'pointer',
-                                                            borderRadius: '4px',
-                                                            transition: 'background-color 0.2s ease',
-                                                            textDecoration: 'none',
-                                                            color: 'inherit',
-                                                            display: 'block',
-                                                            '&:hover': {
-                                                                backgroundColor: '#f8f9fa',
-                                                                color: '#f58220'
-                                                            }
-                                                        }}
-                                                    >
-                                                        {product}
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                            {/* Cột phải */}
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                                {products.slice(8).map((product, index) => (
-                                                    <Box
-                                                        key={index + 8}
-                                                        component={Link}
-                                                        to={`/categories/${product.toLowerCase().replace(/\s+/g, '-').replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a').replace(/[èéẹẻẽêềếệểễ]/g, 'e').replace(/[ìíịỉĩ]/g, 'i').replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o').replace(/[ùúụủũưừứựửữ]/g, 'u').replace(/[ỳýỵỷỹ]/g, 'y').replace(/đ/g, 'd')}`}
-                                                        sx={{
-                                                            padding: '8px 12px',
-                                                            fontSize: '13px',
-                                                            cursor: 'pointer',
-                                                            borderRadius: '4px',
-                                                            transition: 'background-color 0.2s ease',
-                                                            textDecoration: 'none',
-                                                            color: 'inherit',
-                                                            display: 'block',
-                                                            '&:hover': {
-                                                                backgroundColor: '#f8f9fa',
-                                                                color: '#f58220'
-                                                            }
-                                                        }}
-                                                    >
-                                                        {product}
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        </Box>
-                                    )}
-                                </Box>
-
+                                <Link to="/news" style={{ textDecoration: 'none', color: '#000', fontSize: '14px', fontWeight: 500 }}>
+                                    Tin tức
+                                </Link>
                                 <Link to="/reviews" style={{ textDecoration: 'none', color: '#000', fontSize: '14px', fontWeight: 500 }}>
                                     Reviews
                                 </Link>
@@ -400,76 +285,100 @@ const Header: React.FC = () => {
                         }}
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 2 }}>
-                            <Box component="img" src="/logo.jpg" alt="Lumias logo" sx={{ width: 160, height: 56 }} />
+                            <Box component="img" src={generalSettings?.logo || "/logo.jpg"} alt={generalSettings?.siteName || "Lumias logo"} sx={{ width: 160, height: 56 }} />
                             <Box onClick={() => setIsMobileMenuOpen(false)} sx={{ marginLeft: 'auto', fontSize: '14px', cursor: 'pointer' }}>Đóng</Box>
                         </Box>
                         <Box sx={{ fontWeight: 700, fontSize: '14px', marginBottom: 1 }}>Danh mục</Box>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            {mobileMenuItems.map((item) => (
-                                <Box key={item.label}>
-                                    {item.children ? (
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                padding: '12px 8px',
-                                                borderBottom: '1px solid #f0f0f0',
-                                                cursor: 'pointer',
-                                                fontSize: '14px',
-                                                fontWeight: 500,
-                                                color: '#222'
-                                            }}
-                                            onClick={() => toggleGroup(item.label)}
-                                        >
-                                            <span>{item.label}</span>
-                                            <KeyboardArrowDown
-                                                sx={{
-                                                    transform: openGroups[item.label] ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                    transition: 'transform .2s',
-                                                    color: '#666'
-                                                }}
-                                            />
-                                        </Box>
-                                    ) : (
-                                        <Link
-                                            to={item.to as string}
-                                            style={{
-                                                display: 'block',
-                                                padding: '12px 8px',
-                                                borderBottom: '1px solid #f0f0f0',
-                                                textDecoration: 'none',
-                                                color: '#222',
-                                                fontSize: '14px'
-                                            }}
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                        >
-                                            {item.label}
-                                        </Link>
-                                    )}
+                            {/* Static menu items */}
+                            <Link
+                                to="/"
+                                style={{
+                                    display: 'block',
+                                    padding: '12px 8px',
+                                    borderBottom: '1px solid #f0f0f0',
+                                    textDecoration: 'none',
+                                    color: '#222',
+                                    fontSize: '14px'
+                                }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Trang chủ
+                            </Link>
+                            <Link
+                                to="/featured"
+                                style={{
+                                    display: 'block',
+                                    padding: '12px 8px',
+                                    borderBottom: '1px solid #f0f0f0',
+                                    textDecoration: 'none',
+                                    color: '#222',
+                                    fontSize: '14px'
+                                }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Mới & Nổi Bật
+                            </Link>
+                            <Link
+                                to="/news"
+                                style={{
+                                    display: 'block',
+                                    padding: '12px 8px',
+                                    borderBottom: '1px solid #f0f0f0',
+                                    textDecoration: 'none',
+                                    color: '#222',
+                                    fontSize: '14px'
+                                }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Tin tức
+                            </Link>
+                            <Link
+                                to="/reviews"
+                                style={{
+                                    display: 'block',
+                                    padding: '12px 8px',
+                                    borderBottom: '1px solid #f0f0f0',
+                                    textDecoration: 'none',
+                                    color: '#222',
+                                    fontSize: '14px'
+                                }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Reviews
+                            </Link>
+                            <Link
+                                to="/contact"
+                                style={{
+                                    display: 'block',
+                                    padding: '12px 8px',
+                                    borderBottom: '1px solid #f0f0f0',
+                                    textDecoration: 'none',
+                                    color: '#222',
+                                    fontSize: '14px'
+                                }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Liên hệ
+                            </Link>
 
-                                    {item.children && openGroups[item.label] && (
-                                        <Box sx={{ pl: 2 }}>
-                                            {item.children.map((child) => (
-                                                <Link
-                                                    key={child.slug}
-                                                    to={`/categories/${child.slug}`}
-                                                    style={{
-                                                        display: 'block',
-                                                        padding: '10px 8px',
-                                                        borderBottom: '1px solid #f7f7f7',
-                                                        textDecoration: 'none',
-                                                        color: '#444',
-                                                        fontSize: '14px'
-                                                    }}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    {child.label}
-                                                </Link>
-                                            ))}
-                                        </Box>
-                                    )}
-                                </Box>
+                            {/* Categories from API */}
+                            {!loading && categories.map((category) => (
+                                <Link
+                                    key={category._id}
+                                    to={`/categories/${category.slug}`}
+                                    style={{
+                                        display: 'block',
+                                        padding: '12px 8px',
+                                        borderBottom: '1px solid #f0f0f0',
+                                        textDecoration: 'none',
+                                        color: '#222',
+                                        fontSize: '14px'
+                                    }}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    {category.name}
+                                </Link>
                             ))}
                         </Box>
                     </Box>

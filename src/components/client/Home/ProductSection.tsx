@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, Tabs, Tab, Card, CardMedia, CardContent, Rating } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, Tabs, Tab, Card, CardMedia, CardContent, Rating, CircularProgress, Alert } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { getProductsByCategory } from '../../../data/mockProducts';
-import type { Product as MockProduct } from '../../../data/mockProducts';
+import { get_categories, get_category_products, Category, CategoryProducts as ApiProduct } from '../../../api/client/categories';
 // import { ArrowUpward } from '@mui/icons-material';
 
 interface Product {
-    id: number;
+    id: string;
     name: string;
     image: string;
     originalPrice?: number;
@@ -18,34 +17,59 @@ interface Product {
 
 const ProductSection: React.FC = () => {
     const [activeTab, setActiveTab] = useState(0);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const categories = [
-        { name: 'Thiết bị nhà bếp', slug: 'may-xay-sinh-to-cong-nghiep' },
-        { name: 'Quạt', slug: 'fans' },
-        { name: 'Điện gia dụng', slug: 'appliances' },
-        { name: 'Máy hút ẩm', slug: 'dehumidifier' },
-        { name: 'Sức khoẻ & Làm đẹp', slug: 'health-beauty' }
-    ];
+    useEffect(() => {
+        loadCategories();
+    }, []);
 
-    // Lấy sản phẩm theo danh mục hiện tại
-    const getCurrentProducts = (): Product[] => {
-        const categorySlug = categories[activeTab].slug;
-        const categoryProducts = getProductsByCategory(categorySlug);
+    useEffect(() => {
+        if (categories.length > 0) {
+            loadProducts();
+        }
+    }, [activeTab, categories]);
 
-        // Chuyển đổi format từ mockProducts sang format của ProductSection
-        return categoryProducts.slice(0, 8).map((product: MockProduct) => ({
-            id: product.id,
-            name: product.name,
-            image: product.image,
-            originalPrice: product.priceOriginal ? parseInt(product.priceOriginal.replace(/\./g, '')) : undefined,
-            salePrice: parseInt(product.priceCurrent.replace(/\./g, '')),
-            rating: product.rating,
-            sold: product.sold,
-            isFromPrice: false
-        }));
+    const loadCategories = async () => {
+        try {
+            const data = await get_categories();
+            setCategories(data);
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            setError('Lỗi tải danh mục sản phẩm');
+        }
     };
 
-    const products = getCurrentProducts();
+    const loadProducts = async () => {
+        if (categories.length === 0) return;
+
+        try {
+            setLoading(true);
+            const categoryId = categories[activeTab]._id;
+            const data = await get_category_products(categoryId, { limit: 8 });
+
+            // Chuyển đổi format từ API sang format của ProductSection
+            const formattedProducts = data.map((product: ApiProduct) => ({
+                id: product._id,
+                name: product.name,
+                image: product.images[0] || '/placeholder.jpg',
+                originalPrice: product.originalPrice,
+                salePrice: product.price,
+                rating: product.ratingAvg || 0,
+                sold: Math.floor(Math.random() * 100) + 10, // Mock sold count
+                isFromPrice: false
+            }));
+
+            setProducts(formattedProducts);
+        } catch (error) {
+            console.error('Error loading products:', error);
+            setError('Lỗi tải sản phẩm');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
@@ -58,7 +82,17 @@ const ProductSection: React.FC = () => {
         }).format(price).replace('₫', '₫');
     };
 
-
+    if (error) {
+        return (
+            <div className='product-section'>
+                <Box className="container" sx={{ padding: { xs: '40px 0', sm: '50px 0', md: '60px 0' } }}>
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                </Box>
+            </div>
+        );
+    }
 
     return (
         <div className='product-section'>
@@ -168,119 +202,125 @@ const ProductSection: React.FC = () => {
                                 }}
                             >
                                 {categories.map((category, index) => (
-                                    <Tab key={index} label={category.name} />
+                                    <Tab key={category._id} label={category.name} />
                                 ))}
                             </Tabs>
                         </Box>
 
                         {/* Product Grid */}
-                        <Box
-                            sx={{
-                                display: 'grid',
-                                gridTemplateColumns: {
-                                    xs: 'repeat(2, 1fr)',
-                                    sm: 'repeat(3, 1fr)',
-                                    md: 'repeat(4, 1fr)'
-                                },
-                                gap: { xs: 2, sm: 2.5, md: 3 }
-                            }}
-                        >
-                            {products.map((product) => (
-                                <Card
-                                    key={product.id}
-                                    component={Link}
-                                    to={`/products/${product.id}`}
-                                    sx={{
-                                        backgroundColor: '#fff',
-                                        borderRadius: '12px',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                        transition: 'transform 0.2s, box-shadow 0.2s',
-                                        textDecoration: 'none',
-                                        color: 'inherit',
-                                        '&:hover': {
-                                            transform: 'translateY(-4px)',
-                                            boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-                                        }
-                                    }}
-                                >
-                                    <CardMedia
-                                        component="img"
+                        {loading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : (
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: {
+                                        xs: 'repeat(2, 1fr)',
+                                        sm: 'repeat(3, 1fr)',
+                                        md: 'repeat(4, 1fr)'
+                                    },
+                                    gap: { xs: 2, sm: 2.5, md: 3 }
+                                }}
+                            >
+                                {products.map((product) => (
+                                    <Card
+                                        key={product.id}
+                                        component={Link}
+                                        to={`/products/${product.id}`}
                                         sx={{
-                                            height: { xs: 160, sm: 180, md: 200 },
-                                            objectFit: 'contain',
-                                            padding: { xs: 1.5, sm: 1.8, md: 2 },
-                                            backgroundColor: '#fafafa'
+                                            backgroundColor: '#fff',
+                                            borderRadius: '12px',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                            textDecoration: 'none',
+                                            color: 'inherit',
+                                            '&:hover': {
+                                                transform: 'translateY(-4px)',
+                                                boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+                                            }
                                         }}
-                                        image={product.image}
-                                        alt={product.name}
-                                    />
-                                    <CardContent sx={{ padding: { xs: 1.5, sm: 1.8, md: 2 } }}>
-                                        <Typography
-                                            variant="body2"
+                                    >
+                                        <CardMedia
+                                            component="img"
                                             sx={{
-                                                fontSize: { xs: '12px', sm: '13px', md: '14px' },
-                                                fontWeight: 500,
-                                                color: '#333',
-                                                marginBottom: { xs: 1, sm: 1.2, md: 1.5 },
-                                                lineHeight: 1.4,
-                                                height: { xs: '32px', sm: '36px', md: '40px' },
-                                                overflow: 'hidden',
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 2,
-                                                WebkitBoxOrient: 'vertical'
+                                                height: { xs: 160, sm: 180, md: 200 },
+                                                objectFit: 'contain',
+                                                padding: { xs: 1.5, sm: 1.8, md: 2 },
+                                                backgroundColor: '#fafafa'
                                             }}
-                                        >
-                                            {product.name}
-                                        </Typography>
-
-                                        <Box sx={{ marginBottom: { xs: 1, sm: 1.2, md: 1.5 } }}>
-                                            {product.originalPrice && (
-                                                <Typography
-                                                    sx={{
-                                                        fontSize: { xs: '11px', sm: '12px', md: '13px' },
-                                                        color: '#999',
-                                                        textDecoration: 'line-through',
-                                                        display: 'inline-block',
-                                                        marginRight: 1
-                                                    }}
-                                                >
-                                                    {formatPrice(product.originalPrice)}
-                                                </Typography>
-                                            )}
+                                            image={product.image}
+                                            alt={product.name}
+                                        />
+                                        <CardContent sx={{ padding: { xs: 1.5, sm: 1.8, md: 2 } }}>
                                             <Typography
+                                                variant="body2"
                                                 sx={{
-                                                    fontSize: { xs: '14px', sm: '15px', md: '16px' },
-                                                    fontWeight: 700,
-                                                    color: '#f58220',
-                                                    display: 'inline-block'
+                                                    fontSize: { xs: '12px', sm: '13px', md: '14px' },
+                                                    fontWeight: 500,
+                                                    color: '#333',
+                                                    marginBottom: { xs: 1, sm: 1.2, md: 1.5 },
+                                                    lineHeight: 1.4,
+                                                    height: { xs: '32px', sm: '36px', md: '40px' },
+                                                    overflow: 'hidden',
+                                                    display: '-webkit-box',
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: 'vertical'
                                                 }}
                                             >
-                                                {product.isFromPrice ? 'Chỉ từ: ' : ''}{formatPrice(product.salePrice)}
+                                                {product.name}
                                             </Typography>
-                                        </Box>
 
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 0.8, md: 1 } }}>
-                                            <Rating
-                                                value={product.rating}
-                                                precision={0.1}
-                                                size="small"
-                                                readOnly
-                                                sx={{
-                                                    '& .MuiRating-iconFilled': { color: '#ffc107' },
-                                                    fontSize: { xs: '16px', sm: '18px', md: '20px' }
-                                                }}
-                                            />
-                                            <Typography sx={{ fontSize: { xs: '10px', sm: '11px', md: '12px' }, color: '#666' }}>
-                                                {product.rating}
-                                            </Typography>
-                                            <Typography sx={{ fontSize: { xs: '10px', sm: '11px', md: '12px' }, color: '#999' }}>
-                                                Đã bán: {product.sold}
-                                            </Typography>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </Box>
+                                            <Box sx={{ marginBottom: { xs: 1, sm: 1.2, md: 1.5 } }}>
+                                                {product.originalPrice && (
+                                                    <Typography
+                                                        sx={{
+                                                            fontSize: { xs: '11px', sm: '12px', md: '13px' },
+                                                            color: '#999',
+                                                            textDecoration: 'line-through',
+                                                            display: 'inline-block',
+                                                            marginRight: 1
+                                                        }}
+                                                    >
+                                                        {formatPrice(product.originalPrice)}
+                                                    </Typography>
+                                                )}
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: { xs: '14px', sm: '15px', md: '16px' },
+                                                        fontWeight: 700,
+                                                        color: '#f58220',
+                                                        display: 'inline-block'
+                                                    }}
+                                                >
+                                                    {product.isFromPrice ? 'Chỉ từ: ' : ''}{formatPrice(product.salePrice)}
+                                                </Typography>
+                                            </Box>
+
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 0.8, md: 1 } }}>
+                                                <Rating
+                                                    value={product.rating}
+                                                    precision={0.1}
+                                                    size="small"
+                                                    readOnly
+                                                    sx={{
+                                                        '& .MuiRating-iconFilled': { color: '#ffc107' },
+                                                        fontSize: { xs: '16px', sm: '18px', md: '20px' }
+                                                    }}
+                                                />
+                                                <Typography sx={{ fontSize: { xs: '10px', sm: '11px', md: '12px' }, color: '#666' }}>
+                                                    {product.rating}
+                                                </Typography>
+                                                <Typography sx={{ fontSize: { xs: '10px', sm: '11px', md: '12px' }, color: '#999' }}>
+                                                    Đã bán: {product.sold}
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Box>
+                        )}
                     </Box>
                 </Box>
             </Box>

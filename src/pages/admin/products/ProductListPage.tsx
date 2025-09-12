@@ -13,17 +13,24 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Pagination from '@mui/material/Pagination';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { get_admin_products, AdminProduct, delete_admin_product } from '../../../api/products';
 
-const rows = Array.from({ length: 10 }).map((_, i) => ({
-    id: i + 1,
-    name: `Sản phẩm ${i + 1}`,
-    price: (i + 1) * 100000,
-    stock: 100 - i * 3,
-    status: i % 2 === 0 ? 'Đang bán' : 'Tạm ẩn'
-}));
+
 
 const ProductListPage: React.FC = () => {
     const navigate = useNavigate();
+    const [items, setItems] = useState<AdminProduct[]>([]);
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+
+    useEffect(() => {
+        get_admin_products({ search, page, limit: 12 }).then(({ items, pagination }) => {
+            setItems(items);
+            setPages(pagination?.pages || 1);
+        }).catch(() => { setItems([]); setPages(1); });
+    }, [search, page]);
 
     return (
         <AdminLayout title="Sản phẩm">
@@ -35,8 +42,7 @@ const ProductListPage: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <TextField placeholder="Tìm theo tên..." size="small" sx={{ width: 360 }} />
-                <TextField placeholder="Trạng thái" size="small" sx={{ width: 200 }} />
+                <TextField placeholder="Tìm theo tên..." size="small" sx={{ width: 360 }} value={search} onChange={(e) => setSearch(e.target.value)} />
             </Box>
 
             <TableContainer component={Paper} elevation={0}>
@@ -52,16 +58,16 @@ const ProductListPage: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row) => (
-                            <TableRow key={row.id} hover>
-                                <TableCell>{row.id}</TableCell>
+                        {items.map((row) => (
+                            <TableRow key={row._id} hover>
+                                <TableCell>{row._id}</TableCell>
                                 <TableCell>{row.name}</TableCell>
-                                <TableCell align="right">{row.price.toLocaleString('vi-VN')}₫</TableCell>
+                                <TableCell align="right">{Number(row.price).toLocaleString('vi-VN')}₫</TableCell>
                                 <TableCell align="right">{row.stock}</TableCell>
                                 <TableCell>{row.status}</TableCell>
                                 <TableCell align="right">
-                                    <Button size="small" onClick={() => navigate(`/admin/products/${row.id}/edit`)}>Sửa</Button>
-                                    <Button size="small" color="error">Xoá</Button>
+                                    <Button size="small" onClick={() => navigate(`/admin/products/${row._id}/edit`)}>Sửa</Button>
+                                    <Button size="small" color="error" onClick={async () => { await delete_admin_product(row._id); setItems(items.filter(i => i._id !== row._id)); }}>Xoá</Button>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -70,7 +76,7 @@ const ProductListPage: React.FC = () => {
             </TableContainer>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                <Pagination count={5} color="primary" />
+                <Pagination count={pages} page={page} onChange={(_, p) => setPage(p)} color="primary" />
             </Box>
         </AdminLayout>
     );

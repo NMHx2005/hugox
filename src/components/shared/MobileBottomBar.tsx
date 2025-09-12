@@ -1,8 +1,11 @@
 import React from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Phone, ArrowUpward } from '@mui/icons-material';
+import { useAppContext } from '../../hooks/useAppContext';
 
 const MobileBottomBar: React.FC = () => {
+    const { contactSettings } = useAppContext();
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -26,7 +29,7 @@ const MobileBottomBar: React.FC = () => {
         >
             {/* Hotline */}
             <Box
-                onClick={() => window.open('tel:0878784842', '_self')}
+                onClick={() => window.open(`tel:${contactSettings?.phone || '0878784842'}`, '_self')}
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -65,7 +68,7 @@ const MobileBottomBar: React.FC = () => {
 
             {/* Zalo */}
             <Box
-                onClick={() => window.open('https://zalo.me/0878784842', '_blank')}
+                onClick={() => window.open(`https://zalo.me/${contactSettings?.phone || '0878784842'}`, '_blank')}
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',

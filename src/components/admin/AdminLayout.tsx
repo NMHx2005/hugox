@@ -31,7 +31,7 @@ const menuItems = [
     { label: 'Dashboard', icon: <DashboardIcon />, to: '/admin/dashboard' },
     { label: 'Sản phẩm', icon: <ShoppingCartIcon />, to: '/admin/products' },
     { label: 'Danh mục', icon: <CategoryIcon />, to: '/admin/categories' },
-    { label: 'Khách hàng', icon: <PeopleIcon />, to: '/admin/customers' },
+    // { label: 'Khách hàng', icon: <PeopleIcon />, to: '/admin/customers' },
     { label: 'Tin tức', icon: <NewspaperIcon />, to: '/admin/news' },
     { label: 'Cài đặt', icon: <SettingsIcon />, to: '/admin/settings/general' },
 ];

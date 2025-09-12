@@ -11,16 +11,23 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Avatar from '@mui/material/Avatar';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { get_admin_categories, AdminCategory, delete_admin_category } from '../../../api/categories';
 
-const categories = [
-    { id: 1, name: 'Điện gia dụng', slug: 'dien-gia-dung', products: 120 },
-    { id: 2, name: 'Quạt', slug: 'quat', products: 45 },
-    { id: 3, name: 'Máy hút ẩm', slug: 'may-hut-am', products: 32 },
-];
+const categoriesMock: never[] = [];
 
 const CategoryListPage: React.FC = () => {
     const navigate = useNavigate();
+    const [items, setItems] = useState<AdminCategory[]>([]);
+    const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        get_admin_categories({ search }).then((list) => {
+            setItems(Array.isArray(list) ? list : []);
+        }).catch(() => setItems([]));
+    }, [search]);
 
     return (
         <AdminLayout title="Danh mục">
@@ -32,30 +39,38 @@ const CategoryListPage: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <TextField placeholder="Tìm theo tên..." size="small" sx={{ width: 360 }} />
+                <TextField placeholder="Tìm theo tên..." size="small" sx={{ width: 360 }} value={search} onChange={(e) => setSearch(e.target.value)} />
             </Box>
 
             <TableContainer component={Paper} elevation={0}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
+                            <TableCell>Ảnh</TableCell>
                             <TableCell>Tên danh mục</TableCell>
                             <TableCell>Slug</TableCell>
-                            <TableCell align="right">Số SP</TableCell>
+                            <TableCell align="right">Trạng thái</TableCell>
                             <TableCell align="right">Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {categories.map((c) => (
-                            <TableRow key={c.id} hover>
-                                <TableCell>{c.id}</TableCell>
+                        {items.map((c) => (
+                            <TableRow key={c._id} hover>
+                                <TableCell>
+                                    <Avatar
+                                        src={c.image}
+                                        sx={{ width: 50, height: 50 }}
+                                        variant="rounded"
+                                    >
+                                        {c.name.charAt(0)}
+                                    </Avatar>
+                                </TableCell>
                                 <TableCell>{c.name}</TableCell>
                                 <TableCell>{c.slug}</TableCell>
-                                <TableCell align="right">{c.products}</TableCell>
+                                <TableCell align="right">{c.status}</TableCell>
                                 <TableCell align="right">
-                                    <Button size="small" onClick={() => navigate(`/admin/categories/${c.id}/edit`)}>Sửa</Button>
-                                    <Button size="small" color="error">Xoá</Button>
+                                    <Button size="small" onClick={() => navigate(`/admin/categories/${c._id}/edit`)}>Sửa</Button>
+                                    <Button size="small" color="error" onClick={async () => { await delete_admin_category(c._id); setItems(items.filter(i => i._id !== c._id)); }}>Xoá</Button>
                                 </TableCell>
                             </TableRow>
                         ))}

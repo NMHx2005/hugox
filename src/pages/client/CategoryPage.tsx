@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/shared/Layout';
 
 interface Product {
-    id: number;
+    id: string;
     name: string;
     image: string;
     priceOriginal?: string;

@@ -187,8 +187,6 @@ const KOLReviewsSection: React.FC = () => {
                             </SwiperSlide>
                         ))}
                     </Swiper>
-
-                    {/* Custom Navigation Buttons */}
                     <IconButton
                         className="swiper-button-prev-kol"
                         sx={{

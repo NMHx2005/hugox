@@ -1,10 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import { Grid, Typography, Box, Card, CardContent, CircularProgress, Alert, Snackbar } from '@mui/material';
 import {
     LineChart,
     Line,
@@ -22,57 +18,114 @@ import {
     ResponsiveContainer,
     Legend
 } from 'recharts';
-
-// Mock data for charts
-const revenueData = [
-    { name: 'T2', revenue: 4000, orders: 24 },
-    { name: 'T3', revenue: 3000, orders: 13 },
-    { name: 'T4', revenue: 2000, orders: 98 },
-    { name: 'T5', revenue: 2780, orders: 39 },
-    { name: 'T6', revenue: 1890, orders: 48 },
-    { name: 'T7', revenue: 2390, orders: 38 },
-    { name: 'CN', revenue: 3490, orders: 43 },
-];
-
-const categoryData = [
-    { name: 'Điện thoại', value: 400, color: '#8884d8' },
-    { name: 'Laptop', value: 300, color: '#82ca9d' },
-    { name: 'Phụ kiện', value: 200, color: '#ffc658' },
-    { name: 'Khác', value: 100, color: '#ff7300' },
-];
-
-const kpis = [
-    {
-        label: 'Doanh thu hôm nay',
-        value: '12.5M',
-        change: '+12.5%',
-        color: '#e3f2fd',
-        icon: '💰'
-    },
-    {
-        label: 'Đơn hàng mới',
-        value: '128',
-        change: '+8.2%',
-        color: '#e8f5e9',
-        icon: '📦'
-    },
-    {
-        label: 'Khách hàng mới',
-        value: '34',
-        change: '+15.3%',
-        color: '#fff3e0',
-        icon: '👥'
-    },
-    {
-        label: 'Tồn kho thấp',
-        value: '7',
-        change: '-2.1%',
-        color: '#ffebee',
-        icon: '⚠️'
-    },
-];
+import { get_admin_dashboard_stats, get_admin_revenue_data, get_admin_category_data, DashboardStats, RevenueData, CategoryData } from '../../api/dashboard';
 
 const DashboardPage: React.FC = () => {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [revenueData, setRevenueData] = useState<RevenueData['revenueChart']>([]);
+    const [categoryData, setCategoryData] = useState<CategoryData['categoryStats']>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        loadDashboardData();
+    }, []);
+
+    const loadDashboardData = async () => {
+        try {
+            setLoading(true);
+            const [statsData, revenueData, categoryData] = await Promise.all([
+                get_admin_dashboard_stats(),
+                get_admin_revenue_data('7d'),
+                get_admin_category_data()
+            ]);
+
+            setStats(statsData);
+            setRevenueData(revenueData.revenueChart);
+            setCategoryData(categoryData.categoryStats);
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            setError('Lỗi tải dữ liệu dashboard');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
+    const formatNumber = (num: number) => {
+        return new Intl.NumberFormat('vi-VN').format(num);
+    };
+
+    // Prepare KPI data from API
+    const kpis = stats ? [
+        {
+            label: 'Tổng doanh thu',
+            value: formatCurrency(stats.totalRevenue),
+            change: '+12.5%',
+            color: '#e3f2fd',
+            icon: '💰'
+        },
+        {
+            label: 'Tổng đơn hàng',
+            value: formatNumber(stats.totalOrders),
+            change: '+8.2%',
+            color: '#e8f5e9',
+            icon: '📦'
+        },
+        {
+            label: 'Tổng khách hàng',
+            value: formatNumber(stats.totalUsers),
+            change: '+15.3%',
+            color: '#fff3e0',
+            icon: '👥'
+        },
+        {
+            label: 'Tổng sản phẩm',
+            value: formatNumber(stats.totalProducts),
+            change: '-2.1%',
+            color: '#ffebee',
+            icon: '⚠️'
+        },
+    ] : [];
+
+    // Prepare chart data
+    const chartData = revenueData.map(item => ({
+        name: new Date(item.date).toLocaleDateString('vi-VN', { weekday: 'short' }),
+        revenue: item.revenue,
+        orders: item.orders
+    }));
+
+    const pieData = categoryData.map((item, index) => ({
+        name: item.category,
+        value: item.count,
+        color: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00bcd4'][index % 5]
+    }));
+
+    if (loading) {
+        return (
+            <AdminLayout title="Dashboard">
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                    <CircularProgress />
+                </Box>
+            </AdminLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <AdminLayout title="Dashboard">
+                <Alert severity="error" sx={{ mb: 3 }}>
+                    {error}
+                </Alert>
+            </AdminLayout>
+        );
+    }
     return (
         <AdminLayout title="Dashboard">
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: '#111' }}>Tổng quan</Typography>
@@ -121,7 +174,7 @@ const DashboardPage: React.FC = () => {
                         </Typography>
                         <Box sx={{ height: 300 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={revenueData}>
+                                <AreaChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                     <XAxis dataKey="name" stroke="#666" />
                                     <YAxis stroke="#666" />
@@ -132,6 +185,10 @@ const DashboardPage: React.FC = () => {
                                             borderRadius: '8px',
                                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                         }}
+                                        formatter={(value, name) => [
+                                            name === 'revenue' ? formatCurrency(Number(value)) : value,
+                                            name === 'revenue' ? 'Doanh thu' : 'Đơn hàng'
+                                        ]}
                                     />
                                     <Legend />
                                     <Area
@@ -141,7 +198,7 @@ const DashboardPage: React.FC = () => {
                                         stroke="#8884d8"
                                         fill="#8884d8"
                                         fillOpacity={0.6}
-                                        name="Doanh thu (₫)"
+                                        name="Doanh thu"
                                     />
                                     <Area
                                         type="monotone"
@@ -167,7 +224,7 @@ const DashboardPage: React.FC = () => {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={categoryData}
+                                        data={pieData}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
@@ -175,7 +232,7 @@ const DashboardPage: React.FC = () => {
                                         paddingAngle={5}
                                         dataKey="value"
                                     >
-                                        {categoryData.map((entry, index) => (
+                                        {pieData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
@@ -186,6 +243,7 @@ const DashboardPage: React.FC = () => {
                                             borderRadius: '8px',
                                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                         }}
+                                        formatter={(value, name) => [formatNumber(Number(value)), 'Sản phẩm']}
                                     />
                                     <Legend />
                                 </PieChart>
@@ -204,7 +262,7 @@ const DashboardPage: React.FC = () => {
                         </Typography>
                         <Box sx={{ height: 250 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={revenueData}>
+                                <LineChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                     <XAxis dataKey="name" stroke="#666" />
                                     <YAxis stroke="#666" />
@@ -215,6 +273,7 @@ const DashboardPage: React.FC = () => {
                                             borderRadius: '8px',
                                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                         }}
+                                        formatter={(value) => [formatCurrency(Number(value)), 'Doanh thu']}
                                     />
                                     <Line
                                         type="monotone"
@@ -237,7 +296,7 @@ const DashboardPage: React.FC = () => {
                         </Typography>
                         <Box sx={{ height: 250 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={revenueData}>
+                                <BarChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                     <XAxis dataKey="name" stroke="#666" />
                                     <YAxis stroke="#666" />
@@ -248,6 +307,7 @@ const DashboardPage: React.FC = () => {
                                             borderRadius: '8px',
                                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                         }}
+                                        formatter={(value) => [formatNumber(Number(value)), 'Đơn hàng']}
                                     />
                                     <Bar
                                         dataKey="orders"
