@@ -60,7 +60,7 @@ const ProductCard = ({ product }) => {
                                     fontWeight: 700,
                                     color: '#f58220',
                                     display: 'inline-block'
-                                }, children: formatPrice(product.price) })] }), _jsxs(Box, { sx: { display: 'flex', alignItems: 'center', gap: 1, marginBottom: { xs: '8px', sm: '10px' } }, children: [_jsx(Rating, { value: product.ratingAvg || 0, precision: 0.1, size: "small", readOnly: true, sx: {
+                                }, children: formatPrice(product.price) })] }), _jsxs(Box, { sx: { display: 'flex', alignItems: 'center', gap: 1, marginBottom: { xs: '8px', sm: '10px' } }, children: [_jsx(Rating, { value: product.rating || 0, precision: 0.1, size: "small", readOnly: true, sx: {
                                     '& .MuiRating-iconFilled': { color: '#ffc107' },
                                     fontSize: { xs: '16px', sm: '18px' }
                                 } }), _jsxs(Typography, { sx: { fontSize: { xs: '11px', sm: '12px' }, color: '#666' }, children: ["(", product.reviewsCount || 0, ")"] })] }), _jsx(Typography, { sx: {

@@ -30,10 +30,17 @@ const CategoryFormPage = () => {
     useEffect(() => {
         if (isEdit && id) {
             get_admin_category(id).then((data) => {
+                console.log('=== CATEGORY LOAD DEBUG ===');
+                console.log('Raw category data:', data);
+                console.log('Parent field:', data.parent);
+                console.log('Parent type:', typeof data.parent);
+                const parentId = typeof data.parent === 'object' && data.parent?._id
+                    ? data.parent._id
+                    : (typeof data.parent === 'string' ? data.parent : '');
                 setForm({
                     name: data.name || '',
                     slug: data.slug || '',
-                    parent: data.parent || '',
+                    parent: parentId,
                     description: data.description || '',
                     status: data.status || 'active',
                     image: data.image || ''
@@ -44,9 +51,15 @@ const CategoryFormPage = () => {
     useEffect(() => {
         // load parents for select
         get_admin_categories().then((list) => {
-            setParentOptions(Array.isArray(list) ? list : []);
+            console.log('=== PARENT OPTIONS DEBUG ===');
+            console.log('Categories list:', list);
+            // Filter out current category to avoid circular reference
+            const filteredList = Array.isArray(list)
+                ? list.filter(cat => cat._id !== id)
+                : [];
+            setParentOptions(filteredList);
         }).catch(() => setParentOptions([]));
-    }, []);
+    }, [id]);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
@@ -77,14 +90,20 @@ const CategoryFormPage = () => {
     };
     const handleSubmit = async () => {
         try {
+            // Clean up parent field - convert empty string to null
+            const cleanParent = form.parent && form.parent.trim() !== '' ? form.parent : null;
             const payload = {
                 name: form.name,
                 slug: form.slug || form.name.toLowerCase().trim().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, ''),
                 description: form.description,
-                parent: form.parent || undefined,
+                parent: cleanParent,
                 status: form.status,
                 image: form.image
             };
+            // Debug: Log payload to check parent field
+            console.log('=== CATEGORY FORM DEBUG ===');
+            console.log('Form data:', form);
+            console.log('Payload:', payload);
             if (isEdit && id)
                 await update_admin_category(id, payload);
             else
@@ -93,6 +112,7 @@ const CategoryFormPage = () => {
             setTimeout(() => navigate('/admin/categories'), 600);
         }
         catch (e) {
+            console.error('Error saving category:', e);
             setToast({ open: true, message: e?.response?.data?.message || 'Lưu danh mục thất bại', severity: 'error' });
         }
     };

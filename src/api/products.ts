@@ -27,6 +27,19 @@ export type AdminProduct = {
         content: string;
         order?: number;
     }>;
+    specifications?: Array<{
+        title: string;
+        content: string;
+        order?: number;
+    }>;
+    // Rating and Review Information
+    rating?: number;
+    reviewsCount?: number;
+    sold?: number;
+    // Quality Metrics
+    qualityRating?: number;
+    deliveryRating?: number;
+    warrantyRating?: number;
 };
 
 export type AdminPagination = {
@@ -36,7 +49,7 @@ export type AdminPagination = {
     pages: number;
 };
 
-export async function get_admin_products(params?: { page?: number; limit?: number; search?: string }): Promise<{ items: AdminProduct[]; pagination?: AdminPagination }> {
+export async function get_admin_products(params?: { page?: number; limit?: number; search?: string; status?: string }): Promise<{ items: AdminProduct[]; pagination?: AdminPagination }> {
     const { data } = await api.get('/admin/products', { params });
     const list = (data?.data?.products ?? data?.products ?? []) as AdminProduct[];
     const pagination = (data?.data?.pagination ?? data?.pagination) as AdminPagination | undefined;
@@ -75,6 +88,19 @@ export async function create_admin_product(payload: {
         content: string;
         order?: number;
     }>;
+    specifications?: Array<{
+        title: string;
+        content: string;
+        order?: number;
+    }>;
+    // Rating and Review Information
+    rating?: number;
+    reviewsCount?: number;
+    sold?: number;
+    // Quality Metrics
+    qualityRating?: number;
+    deliveryRating?: number;
+    warrantyRating?: number;
 }) {
     const { data } = await api.post('/admin/products', payload);
     return data as AdminProduct;
@@ -106,6 +132,19 @@ export async function update_admin_product(id: string, payload: {
         content: string;
         order?: number;
     }>;
+    specifications?: Array<{
+        title: string;
+        content: string;
+        order?: number;
+    }>;
+    // Rating and Review Information
+    rating?: number;
+    reviewsCount?: number;
+    sold?: number;
+    // Quality Metrics
+    qualityRating?: number;
+    deliveryRating?: number;
+    warrantyRating?: number;
 }) {
     const { data } = await api.put(`/admin/products/${id}`, payload);
     return data as AdminProduct;

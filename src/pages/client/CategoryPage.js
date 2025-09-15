@@ -58,7 +58,7 @@ const CategoryPage = ({ categoryName, bannerImage, products }) => {
             },
         }, children: [_jsx(Box, { sx: { position: 'relative', overflow: 'hidden' }, children: _jsx(Link, { to: `/products/${product.id}`, style: { display: 'block', textDecoration: 'none' }, children: _jsx(Box, { component: "img", src: product.image, alt: product.name, sx: {
                             width: '100%',
-                            height: { xs: 150, md: 200 },
+                            // height: { xs: 150, md: 200 },
                             objectFit: 'cover',
                             transition: 'transform 0.3s ease',
                             '&:hover': {

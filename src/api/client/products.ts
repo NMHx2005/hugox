@@ -19,11 +19,16 @@ export type Product = {
     status: string;
     featured: boolean;
     tags: string[];
-    ratingAvg?: number;
+    // Use direct database fields instead of calculated values
+    rating?: number;
     reviewsCount?: number;
     sold?: number;
     discountPercentage?: number;
     isAvailable?: boolean;
+    // Quality Metrics
+    qualityRating?: number;
+    deliveryRating?: number;
+    warrantyRating?: number;
     purchaseLinks?: {
         shopee?: string;
         tiktok?: string;
@@ -34,6 +39,11 @@ export type Product = {
         }>;
     };
     additionalInfo?: Array<{
+        title: string;
+        content: string;
+        order?: number;
+    }>;
+    specifications?: Array<{
         title: string;
         content: string;
         order?: number;
@@ -59,8 +69,6 @@ export type ProductResponse = {
     success: boolean;
     data: {
         product: Product;
-        ratingAvg?: number;
-        reviewsCount?: number;
         related?: Product[];
     };
 };

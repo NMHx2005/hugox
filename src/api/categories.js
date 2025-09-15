@@ -21,3 +21,7 @@ export async function delete_admin_category(id) {
     const { data } = await api.delete(`/admin/categories/${id}`);
     return data;
 }
+export async function change_category_status(id, status) {
+    const { data } = await api.patch(`/admin/categories/${id}/status`, { status });
+    return data;
+}

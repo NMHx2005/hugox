@@ -115,7 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 {/* Rating */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: { xs: '8px', sm: '10px' } }}>
                     <Rating
-                        value={product.ratingAvg || 0}
+                        value={product.rating || 0}
                         precision={0.1}
                         size="small"
                         readOnly

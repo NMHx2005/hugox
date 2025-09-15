@@ -21,6 +21,7 @@ import {
     ProfilePage,
     DynamicCategoryPage,
 } from '../pages/client';
+import SearchPage from '../pages/client/SearchPage';
 
 // Admin Pages
 import {
@@ -53,6 +54,7 @@ const AppRouter: React.FC = () => {
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:id" element={<ProductDetailPage />} />
+                <Route path="/search" element={<SearchPage />} />
                 <Route path="/news" element={<NewsPage />} />
                 <Route path="/news/:id" element={<NewsDetailPage />} />
                 <Route path="/reviews" element={<ReviewsPage />} />

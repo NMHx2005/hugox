@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { get_admin_categories } from '../../../api/categories';
 import { create_admin_product } from '../../../api/products';
 import { upload_product_image } from '../../../api/uploads';
+import RichTextEditor from '../../../components/shared/RichTextEditor';
 
 const ProductCreatePage: React.FC = () => {
     const navigate = useNavigate();
@@ -33,6 +34,22 @@ const ProductCreatePage: React.FC = () => {
     });
 
     const [additionalInfo, setAdditionalInfo] = useState([{ title: '', content: '', order: 0 }]);
+    const [specifications, setSpecifications] = useState([{ title: '', content: '', order: 0 }]);
+
+    // Rating and Review Information
+    const [ratingInfo, setRatingInfo] = useState({
+        rating: '',
+        reviewsCount: '',
+        sold: ''
+    });
+
+    // Quality Metrics
+    const [qualityMetrics, setQualityMetrics] = useState({
+        qualityRating: '',
+        deliveryRating: '5',
+        warrantyRating: '5'
+    });
+
 
     const [images, setImages] = useState<string[]>(['']);
     const [imageMode, setImageMode] = useState<'url' | 'upload'>('url');
@@ -88,6 +105,28 @@ const ProductCreatePage: React.FC = () => {
         setAdditionalInfo(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handleSpecificationChange = (index: number, field: 'title' | 'content' | 'order', value: string | number) => {
+        setSpecifications(prev => prev.map((spec, i) => i === index ? { ...spec, [field]: value } : spec));
+    };
+
+    const addSpecification = () => {
+        setSpecifications(prev => [...prev, { title: '', content: '', order: prev.length }]);
+    };
+
+    const removeSpecification = (index: number) => {
+        setSpecifications(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Rating and metrics handlers
+    const handleRatingInfoChange = (field: 'rating' | 'reviewsCount' | 'sold', value: string) => {
+        setRatingInfo(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleQualityMetricsChange = (field: 'qualityRating' | 'deliveryRating' | 'warrantyRating', value: string) => {
+        setQualityMetrics(prev => ({ ...prev, [field]: value }));
+    };
+
+
     const handleUpload = async (file: File, index: number) => {
         try {
             setUploadingCount((c) => c + 1);
@@ -126,7 +165,7 @@ const ProductCreatePage: React.FC = () => {
                 sku: form.sku || undefined,
                 brand: form.brand || undefined,
                 featured: form.featured === 'true',
-                status: form.status,
+                status: form.status as 'active' | 'inactive' | 'draft',
                 tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
                 purchaseLinks: {
                     shopee: purchaseLinks.shopee || undefined,
@@ -134,16 +173,23 @@ const ProductCreatePage: React.FC = () => {
                     facebook: purchaseLinks.facebook || undefined,
                     custom: purchaseLinks.custom.filter(link => link.platform && link.url)
                 },
-                additionalInfo: additionalInfo.filter(info => info.title && info.content)
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any;
+                additionalInfo: additionalInfo.filter(info => info.title && info.content),
+                specifications: specifications.filter(spec => spec.title && spec.content),
+                // Rating and Review Information
+                rating: ratingInfo.rating ? Number(ratingInfo.rating) : undefined,
+                reviewsCount: ratingInfo.reviewsCount ? Number(ratingInfo.reviewsCount) : undefined,
+                sold: ratingInfo.sold ? Number(ratingInfo.sold) : undefined,
+                // Quality Metrics
+                qualityRating: qualityMetrics.qualityRating ? Number(qualityMetrics.qualityRating) : undefined,
+                deliveryRating: qualityMetrics.deliveryRating ? Number(qualityMetrics.deliveryRating) : undefined,
+                warrantyRating: qualityMetrics.warrantyRating ? Number(qualityMetrics.warrantyRating) : undefined
+            };
             await create_admin_product(payload);
             setToast({ open: true, message: 'Tạo sản phẩm thành công', severity: 'success' });
             setTimeout(() => navigate('/admin/products'), 800);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (e: any) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setToast({ open: true, message: e?.response?.data?.message || 'Tạo sản phẩm thất bại', severity: 'error' });
+        } catch (e: unknown) {
+            const error = e as { response?: { data?: { message?: string } } };
+            setToast({ open: true, message: error?.response?.data?.message || 'Tạo sản phẩm thất bại', severity: 'error' });
         }
     };
 
@@ -154,7 +200,17 @@ const ProductCreatePage: React.FC = () => {
             </Typography>
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, display: 'grid', gap: 2, maxWidth: 820 }}>
                 <TextField label="Tên sản phẩm" name="name" value={form.name} onChange={handleChange} required />
-                <TextField label="Mô tả" name="description" value={form.description} onChange={handleChange} multiline minRows={3} />
+                <Box>
+                    <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        Mô tả sản phẩm
+                    </Typography>
+                    <RichTextEditor
+                        value={form.description}
+                        onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
+                        placeholder="Nhập mô tả chi tiết sản phẩm..."
+                        minHeight={200}
+                    />
+                </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
                     <TextField label="Giá" name="price" value={form.price} onChange={handleChange} type="number" />
                     <TextField label="Giá gốc" name="originalPrice" value={form.originalPrice} onChange={handleChange} type="number" />
@@ -177,6 +233,62 @@ const ProductCreatePage: React.FC = () => {
                     <TextField label="Thương hiệu" name="brand" value={form.brand} onChange={handleChange} />
                 </Box>
                 <TextField label="Tags (phân tách dấu phẩy)" value={tags} onChange={(e) => setTags(e.target.value)} />
+
+                {/* Rating and Review Information */}
+                <Typography variant="h6" sx={{ mt: 2 }}>Thông tin đánh giá & bán hàng</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                        label="Điểm đánh giá (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={ratingInfo.rating}
+                        onChange={(e) => handleRatingInfoChange('rating', e.target.value)}
+                        placeholder="4.5"
+                    />
+                    <TextField
+                        label="Số lượt đánh giá"
+                        type="number"
+                        inputProps={{ min: 0 }}
+                        value={ratingInfo.reviewsCount}
+                        onChange={(e) => handleRatingInfoChange('reviewsCount', e.target.value)}
+                        placeholder="120"
+                    />
+                    <TextField
+                        label="Số lượng đã bán"
+                        type="number"
+                        inputProps={{ min: 0 }}
+                        value={ratingInfo.sold}
+                        onChange={(e) => handleRatingInfoChange('sold', e.target.value)}
+                        placeholder="500"
+                    />
+                </Box>
+
+                {/* Quality Metrics */}
+                <Typography variant="h6" sx={{ mt: 2 }}>Đánh giá chất lượng dịch vụ</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                        label="Chất lượng sản phẩm (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={qualityMetrics.qualityRating}
+                        onChange={(e) => handleQualityMetricsChange('qualityRating', e.target.value)}
+                        placeholder="4.5"
+                    />
+                    <TextField
+                        label="Tốc độ giao hàng (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={qualityMetrics.deliveryRating}
+                        onChange={(e) => handleQualityMetricsChange('deliveryRating', e.target.value)}
+                    />
+                    <TextField
+                        label="Bảo hành dịch vụ (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={qualityMetrics.warrantyRating}
+                        onChange={(e) => handleQualityMetricsChange('warrantyRating', e.target.value)}
+                    />
+                </Box>
 
                 {/* Purchase Links */}
                 <Typography variant="h6" sx={{ mt: 2 }}>Liên kết mua hàng</Typography>
@@ -225,6 +337,41 @@ const ProductCreatePage: React.FC = () => {
                     </Button>
                 </Box>
 
+                {/* Specifications */}
+                <Typography variant="h6" sx={{ mt: 2 }}>Thông số kỹ thuật</Typography>
+                {specifications.map((spec, index) => (
+                    <Box key={index} sx={{ display: 'grid', gap: 2, p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <TextField
+                                label="Tiêu đề"
+                                value={spec.title}
+                                onChange={(e) => handleSpecificationChange(index, 'title', e.target.value)}
+                                placeholder="Model, Màu sắc, Dung tích, ..."
+                                sx={{ flex: 1 }}
+                            />
+                            <TextField
+                                label="Thứ tự"
+                                type="number"
+                                value={spec.order}
+                                onChange={(e) => handleSpecificationChange(index, 'order', Number(e.target.value))}
+                                sx={{ width: 100 }}
+                            />
+                            <IconButton onClick={() => removeSpecification(index)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Box>
+                        <TextField
+                            label="Nội dung"
+                            value={spec.content}
+                            onChange={(e) => handleSpecificationChange(index, 'content', e.target.value)}
+                            placeholder="LTC-20L, Bạc kim loại, 20L, ..."
+                        />
+                    </Box>
+                ))}
+                <Button startIcon={<AddIcon />} onClick={addSpecification} variant="outlined">
+                    Thêm thông số kỹ thuật
+                </Button>
+
                 {/* Additional Info */}
                 <Typography variant="h6" sx={{ mt: 2 }}>Thông tin bổ sung</Typography>
                 {additionalInfo.map((info, index) => (
@@ -248,14 +395,17 @@ const ProductCreatePage: React.FC = () => {
                                 <DeleteIcon />
                             </IconButton>
                         </Box>
-                        <TextField
-                            label="Nội dung"
-                            value={info.content}
-                            onChange={(e) => handleAdditionalInfoChange(index, 'content', e.target.value)}
-                            multiline
-                            minRows={3}
-                            placeholder="Nhập nội dung chi tiết..."
-                        />
+                        <Box>
+                            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                                Nội dung
+                            </Typography>
+                            <RichTextEditor
+                                value={info.content}
+                                onChange={(value) => handleAdditionalInfoChange(index, 'content', value)}
+                                placeholder="Nhập nội dung chi tiết..."
+                                minHeight={120}
+                            />
+                        </Box>
                     </Box>
                 ))}
                 <Button startIcon={<AddIcon />} onClick={addAdditionalInfo} variant="outlined">
@@ -284,11 +434,6 @@ const ProductCreatePage: React.FC = () => {
                     </Box>
                 ))}
                 <Button startIcon={<AddIcon />} onClick={addImageField} variant="outlined">Thêm ảnh</Button>
-                <TextField select label="Danh mục" name="category" value={form.category} onChange={handleChange} required>
-                    {categories.map(c => (
-                        <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
-                    ))}
-                </TextField>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button type="button" variant="outlined" onClick={() => navigate('/admin/products')}>Huỷ</Button>
                     <Button type="submit" variant="contained" disabled={uploadingCount > 0}>{uploadingCount > 0 ? 'Đang upload ảnh...' : 'Lưu'}</Button>

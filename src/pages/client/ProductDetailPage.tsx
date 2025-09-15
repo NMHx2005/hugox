@@ -32,8 +32,6 @@ const ProductDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<Product | null>(null);
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-    const [ratingAvg, setRatingAvg] = useState(0);
-    const [reviewsCount, setReviewsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -47,8 +45,6 @@ const ProductDetailPage: React.FC = () => {
                 setError(null);
                 const response = await get_product(id);
                 setProduct(response.data.product);
-                setRatingAvg(response.data.ratingAvg || 0);
-                setReviewsCount(response.data.reviewsCount || 0);
 
                 // Load 4 random products for related products
                 await loadRelatedProducts();
@@ -109,17 +105,12 @@ const ProductDetailPage: React.FC = () => {
         ? product.images
         : ['/placeholder-product.jpg'];
 
-    const productAttributes = [
-        { label: 'Màu sắc', value: 'Bạc' },
-        { label: 'Dung tích', value: '20L' },
-        { label: 'Chất liệu', value: 'Thép, nhựa PP' },
-        { label: 'Tiện ích', value: 'Đóng mở 90° không gây ồn' }
-    ];
 
+    // Get quality metrics from database with fallback values
     const qualityMetrics = [
-        { label: 'Chất lượng sản phẩm', rating: ratingAvg },
-        { label: 'Tốc độ giao hàng', rating: 5.0 },
-        { label: 'Bảo hành dịch vụ', rating: 5.0 }
+        { label: 'Chất lượng sản phẩm', rating: product?.qualityRating || product?.rating || 0 },
+        { label: 'Tốc độ giao hàng', rating: product?.deliveryRating || 5.0 },
+        { label: 'Bảo hành dịch vụ', rating: product?.warrantyRating || 5.0 }
     ];
 
     return (
@@ -151,7 +142,7 @@ const ProductDetailPage: React.FC = () => {
                                 alt={product.name}
                                 sx={{
                                     width: '100%',
-                                    maxHeight: 500,
+                                    // maxHeight: 500,
                                     objectFit: 'cover',
                                     borderRadius: 2,
                                     mb: 2
@@ -191,10 +182,10 @@ const ProductDetailPage: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                                 <StarIcon sx={{ color: '#ffb400', fontSize: 20 }} />
                                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                                    {ratingAvg.toFixed(1)}
+                                    {(product.rating || 0).toFixed(1)}
                                 </Typography>
                                 <Typography sx={{ color: '#666' }}>•</Typography>
-                                <Typography sx={{ color: '#666' }}>Đánh giá: {reviewsCount}</Typography>
+                                <Typography sx={{ color: '#666' }}>Đánh giá: {product.reviewsCount || 0}</Typography>
                                 {product.sold && (
                                     <>
                                         <Typography sx={{ color: '#666' }}>•</Typography>
@@ -259,25 +250,6 @@ const ProductDetailPage: React.FC = () => {
                                 )}
                             </Box>
 
-                            {/* Product Attributes */}
-                            <Box sx={{ mb: 3 }}>
-                                {productAttributes.map((attr, index) => (
-                                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <Typography sx={{ minWidth: 100, fontSize: 14, fontWeight: 600 }}>
-                                            {attr.label}:
-                                        </Typography>
-                                        <Chip
-                                            label={attr.value}
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: '#f5f5f5',
-                                                color: '#333',
-                                                fontWeight: 500
-                                            }}
-                                        />
-                                    </Box>
-                                ))}
-                            </Box>
 
                             {/* Purchase Options */}
                             {product.purchaseLinks && (
@@ -411,49 +383,72 @@ const ProductDetailPage: React.FC = () => {
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
                             Mô tả sản phẩm
                         </Typography>
-                        <Typography sx={{ lineHeight: 1.8, color: '#666' }}>
-                            {product.description || `${product.name} là sản phẩm chất lượng cao với thiết kế hiện đại và tiện ích vượt trội.`}
-                        </Typography>
+                        <Box
+                            sx={{
+                                lineHeight: 1.8,
+                                color: '#666',
+                                textAlign: 'left',
+                                fontSize: '14px',
+                                '& p': { margin: '0 0 16px 0' },
+                                '& h1, & h2, & h3, & h4, & h5, & h6': {
+                                    margin: '16px 0 8px 0',
+                                    fontWeight: 600
+                                },
+                                '& ul, & ol': {
+                                    margin: '0 0 16px 0',
+                                    paddingLeft: '24px'
+                                },
+                                '& li': { margin: '4px 0' },
+                                '& strong, & b': { fontWeight: 600 },
+                                '& a': { color: '#1976d2', textDecoration: 'underline' },
+                                '& img': { maxWidth: '100%', height: 'auto' }
+                            }}
+                            dangerouslySetInnerHTML={{
+                                __html: product.description || `<p>${product.name} là sản phẩm chất lượng cao với thiết kế hiện đại và tiện ích vượt trội.</p>`
+                            }}
+                        />
                     </Box>
 
-                    <Box sx={{ mb: 4 }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-                            Thông số kỹ thuật
-                        </Typography>
-                        <Box sx={{
-                            border: '1px solid #ddd',
-                            borderRadius: 1,
-                            overflow: 'hidden'
-                        }}>
+                    {/* Technical Specifications */}
+                    {product.specifications && product.specifications.length > 0 && (
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                                Thông số kỹ thuật
+                            </Typography>
                             <Box sx={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 1fr',
-                                '& > *': {
-                                    borderBottom: '1px solid #eee',
-                                    p: 2,
-                                    '&:nth-of-type(odd)': {
-                                        backgroundColor: '#f9f9f9',
-                                        fontWeight: 600
-                                    }
-                                }
+                                border: '1px solid #ddd',
+                                borderRadius: 1,
+                                overflow: 'hidden'
                             }}>
-                                <Box>Tên sản phẩm</Box>
-                                <Box>{product.name}</Box>
-                                <Box>Model</Box>
-                                <Box>LTC-20L</Box>
-                                <Box>Màu sắc</Box>
-                                <Box>Bạc kim loại</Box>
-                                <Box>Chất liệu</Box>
-                                <Box>Thép, nhựa PP</Box>
-                                <Box>Dung tích</Box>
-                                <Box>20L</Box>
-                                <Box>Khối lượng</Box>
-                                <Box>2.6kg</Box>
-                                <Box>Kích thước sản phẩm</Box>
-                                <Box>340 x 285 x 404mm</Box>
+                                <Box sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    '& > *': {
+                                        borderBottom: '1px solid #eee',
+                                        p: 2,
+                                        '&:nth-of-type(odd)': {
+                                            backgroundColor: '#f9f9f9',
+                                            fontWeight: 600
+                                        }
+                                    }
+                                }}>
+                                    {/* Always show product name first */}
+                                    <Box>Tên sản phẩm</Box>
+                                    <Box>{product.name}</Box>
+
+                                    {/* Dynamic specifications from database */}
+                                    {product.specifications
+                                        .sort((a, b) => (a.order || 0) - (b.order || 0))
+                                        .map((spec, index) => (
+                                            <React.Fragment key={index}>
+                                                <Box>{spec.title}</Box>
+                                                <Box>{spec.content}</Box>
+                                            </React.Fragment>
+                                        ))}
+                                </Box>
                             </Box>
                         </Box>
-                    </Box>
+                    )}
                 </Box>
 
                 {/* Additional Information Sections */}
@@ -467,9 +462,27 @@ const ProductDetailPage: React.FC = () => {
                                         <Typography sx={{ fontWeight: 600 }}>{info.title}</Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
-                                        <Typography sx={{ whiteSpace: 'pre-line' }}>
-                                            {info.content}
-                                        </Typography>
+                                        <Box
+                                            sx={{
+                                                lineHeight: 1.8,
+                                                textAlign: 'left',
+                                                fontSize: '14px',
+                                                '& p': { margin: '0 0 16px 0' },
+                                                '& h1, & h2, & h3, & h4, & h5, & h6': {
+                                                    margin: '16px 0 8px 0',
+                                                    fontWeight: 600
+                                                },
+                                                '& ul, & ol': {
+                                                    margin: '0 0 16px 0',
+                                                    paddingLeft: '24px'
+                                                },
+                                                '& li': { margin: '4px 0' },
+                                                '& strong, & b': { fontWeight: 600 },
+                                                '& a': { color: '#1976d2', textDecoration: 'underline' },
+                                                '& img': { maxWidth: '100%', height: 'auto' }
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: info.content }}
+                                        />
                                     </AccordionDetails>
                                 </Accordion>
                             ))}
@@ -536,7 +549,7 @@ const ProductDetailPage: React.FC = () => {
                                         </Typography>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                             <StarIcon sx={{ color: '#ffb400', fontSize: 16 }} />
-                                            <Typography variant="body2">{relatedProduct.ratingAvg?.toFixed(1) || '0.0'}</Typography>
+                                            <Typography variant="body2">{relatedProduct.rating?.toFixed(1) || '0.0'}</Typography>
                                             {relatedProduct.sold && (
                                                 <Typography variant="body2" sx={{ color: '#666' }}>
                                                     Đã bán: {relatedProduct.sold}

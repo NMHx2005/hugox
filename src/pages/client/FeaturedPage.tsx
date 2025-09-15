@@ -101,7 +101,7 @@ const FeaturedPage: React.FC = () => {
                                     current={p.price ? formatPrice(p.price) : 'Liên hệ'}
                                 />
                             </Box>
-                            <StatsRow rating={p.ratingAvg || 0} sold={p.sold || 0} />
+                            <StatsRow rating={p.rating || 0} sold={p.sold || 0} />
                         </Box>
                     </Box>
                 ))}

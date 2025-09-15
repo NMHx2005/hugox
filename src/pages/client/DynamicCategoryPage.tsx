@@ -89,7 +89,7 @@ const DynamicCategoryPage: React.FC = () => {
         image: product.images[0] || '/placeholder.jpg',
         priceOriginal: product.originalPrice ? product.originalPrice.toLocaleString('vi-VN') : undefined,
         priceCurrent: product.price.toLocaleString('vi-VN'),
-        rating: product.ratingAvg || 0,
+        rating: product.rating || 0,
         sold: product.sold || 0,
         href: `/products/${product.slug}`,
         category: product.category.slug

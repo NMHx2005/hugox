@@ -108,7 +108,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
                         alt={product.name}
                         sx={{
                             width: '100%',
-                            height: { xs: 150, md: 200 },
+                            // height: { xs: 150, md: 200 },
                             objectFit: 'cover',
                             transition: 'transform 0.3s ease',
                             '&:hover': {

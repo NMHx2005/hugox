@@ -7,6 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { get_admin_categories } from '../../../api/categories';
 import { get_admin_product, update_admin_product } from '../../../api/products';
 import { upload_product_image } from '../../../api/uploads';
+import RichTextEditor from '../../../components/shared/RichTextEditor';
 
 const ProductEditPage: React.FC = () => {
     const navigate = useNavigate();
@@ -27,6 +28,22 @@ const ProductEditPage: React.FC = () => {
     });
 
     const [additionalInfo, setAdditionalInfo] = useState([{ title: '', content: '', order: 0 }]);
+    const [specifications, setSpecifications] = useState([{ title: '', content: '', order: 0 }]);
+
+    // Rating and Review Information
+    const [ratingInfo, setRatingInfo] = useState({
+        rating: '',
+        reviewsCount: '',
+        sold: ''
+    });
+
+    // Quality Metrics
+    const [qualityMetrics, setQualityMetrics] = useState({
+        qualityRating: '',
+        deliveryRating: '5',
+        warrantyRating: '5'
+    });
+
 
     useEffect(() => {
         get_admin_categories().then((list: any) => setCategories(list as any[])).catch(() => setCategories([]));
@@ -64,6 +81,28 @@ const ProductEditPage: React.FC = () => {
                 } else {
                     setAdditionalInfo([{ title: '', content: '', order: 0 }]);
                 }
+
+                // Load specifications
+                if (p.specifications && Array.isArray(p.specifications)) {
+                    setSpecifications(p.specifications);
+                } else {
+                    setSpecifications([{ title: '', content: '', order: 0 }]);
+                }
+
+                // Load rating and review info
+                setRatingInfo({
+                    rating: p.rating ? String(p.rating) : '',
+                    reviewsCount: p.reviewsCount ? String(p.reviewsCount) : '',
+                    sold: p.sold ? String(p.sold) : ''
+                });
+
+                // Load quality metrics
+                setQualityMetrics({
+                    qualityRating: p.qualityRating ? String(p.qualityRating) : '',
+                    deliveryRating: p.deliveryRating ? String(p.deliveryRating) : '5',
+                    warrantyRating: p.warrantyRating ? String(p.warrantyRating) : '5'
+                });
+
             });
         }
     }, [id]);
@@ -109,6 +148,28 @@ const ProductEditPage: React.FC = () => {
     const removeAdditionalInfo = (index: number) => {
         setAdditionalInfo(prev => prev.filter((_, i) => i !== index));
     };
+
+    const handleSpecificationChange = (index: number, field: 'title' | 'content' | 'order', value: string | number) => {
+        setSpecifications(prev => prev.map((spec, i) => i === index ? { ...spec, [field]: value } : spec));
+    };
+
+    const addSpecification = () => {
+        setSpecifications(prev => [...prev, { title: '', content: '', order: prev.length }]);
+    };
+
+    const removeSpecification = (index: number) => {
+        setSpecifications(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Rating and metrics handlers
+    const handleRatingInfoChange = (field: 'rating' | 'reviewsCount' | 'sold', value: string) => {
+        setRatingInfo(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleQualityMetricsChange = (field: 'qualityRating' | 'deliveryRating' | 'warrantyRating', value: string) => {
+        setQualityMetrics(prev => ({ ...prev, [field]: value }));
+    };
+
     const handleUpload = async (file: File, index: number) => {
         try {
             setUploadingCount(c => c + 1);
@@ -138,7 +199,7 @@ const ProductEditPage: React.FC = () => {
                 category: form.category,
                 sku: form.sku || undefined,
                 brand: form.brand || undefined,
-                status: form.status as any,
+                status: form.status as 'active' | 'inactive' | 'draft',
                 images: images.filter(Boolean),
                 tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
                 purchaseLinks: {
@@ -147,7 +208,16 @@ const ProductEditPage: React.FC = () => {
                     facebook: purchaseLinks.facebook || undefined,
                     custom: purchaseLinks.custom.filter(link => link.platform && link.url)
                 },
-                additionalInfo: additionalInfo.filter(info => info.title && info.content)
+                additionalInfo: additionalInfo.filter(info => info.title && info.content),
+                specifications: specifications.filter(spec => spec.title && spec.content),
+                // Rating and Review Information
+                rating: ratingInfo.rating ? Number(ratingInfo.rating) : undefined,
+                reviewsCount: ratingInfo.reviewsCount ? Number(ratingInfo.reviewsCount) : undefined,
+                sold: ratingInfo.sold ? Number(ratingInfo.sold) : undefined,
+                // Quality Metrics
+                qualityRating: qualityMetrics.qualityRating ? Number(qualityMetrics.qualityRating) : undefined,
+                deliveryRating: qualityMetrics.deliveryRating ? Number(qualityMetrics.deliveryRating) : undefined,
+                warrantyRating: qualityMetrics.warrantyRating ? Number(qualityMetrics.warrantyRating) : undefined
             });
             setToast({ open: true, message: 'Cập nhật sản phẩm thành công', severity: 'success' });
             setTimeout(() => navigate('/admin/products'), 600);
@@ -163,7 +233,17 @@ const ProductEditPage: React.FC = () => {
             </Typography>
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, display: 'grid', gap: 2, maxWidth: 820 }}>
                 <TextField label="Tên sản phẩm" name="name" value={form.name} onChange={handleChange} required />
-                <TextField label="Mô tả" name="description" value={form.description} onChange={handleChange} multiline minRows={3} />
+                <Box>
+                    <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        Mô tả sản phẩm
+                    </Typography>
+                    <RichTextEditor
+                        value={form.description}
+                        onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
+                        placeholder="Nhập mô tả chi tiết sản phẩm..."
+                        minHeight={200}
+                    />
+                </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
                     <TextField label="Giá" name="price" value={form.price} onChange={handleChange} type="number" />
                     <TextField label="Giá gốc" name="originalPrice" value={form.originalPrice} onChange={handleChange} type="number" />
@@ -186,6 +266,62 @@ const ProductEditPage: React.FC = () => {
                     <TextField label="Thương hiệu" name="brand" value={form.brand} onChange={handleChange} />
                 </Box>
                 <TextField label="Tags (phân tách dấu phẩy)" value={tags} onChange={(e) => setTags(e.target.value)} />
+
+                {/* Rating and Review Information */}
+                <Typography variant="h6" sx={{ mt: 2 }}>Thông tin đánh giá & bán hàng</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                        label="Điểm đánh giá (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={ratingInfo.rating}
+                        onChange={(e) => handleRatingInfoChange('rating', e.target.value)}
+                        placeholder="4.5"
+                    />
+                    <TextField
+                        label="Số lượt đánh giá"
+                        type="number"
+                        inputProps={{ min: 0 }}
+                        value={ratingInfo.reviewsCount}
+                        onChange={(e) => handleRatingInfoChange('reviewsCount', e.target.value)}
+                        placeholder="120"
+                    />
+                    <TextField
+                        label="Số lượng đã bán"
+                        type="number"
+                        inputProps={{ min: 0 }}
+                        value={ratingInfo.sold}
+                        onChange={(e) => handleRatingInfoChange('sold', e.target.value)}
+                        placeholder="500"
+                    />
+                </Box>
+
+                {/* Quality Metrics */}
+                <Typography variant="h6" sx={{ mt: 2 }}>Đánh giá chất lượng dịch vụ</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                        label="Chất lượng sản phẩm (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={qualityMetrics.qualityRating}
+                        onChange={(e) => handleQualityMetricsChange('qualityRating', e.target.value)}
+                        placeholder="4.5"
+                    />
+                    <TextField
+                        label="Tốc độ giao hàng (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={qualityMetrics.deliveryRating}
+                        onChange={(e) => handleQualityMetricsChange('deliveryRating', e.target.value)}
+                    />
+                    <TextField
+                        label="Bảo hành dịch vụ (0-5)"
+                        type="number"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        value={qualityMetrics.warrantyRating}
+                        onChange={(e) => handleQualityMetricsChange('warrantyRating', e.target.value)}
+                    />
+                </Box>
 
                 {/* Purchase Links */}
                 <Typography variant="h6" sx={{ mt: 2 }}>Liên kết mua hàng</Typography>
@@ -234,6 +370,41 @@ const ProductEditPage: React.FC = () => {
                     </Button>
                 </Box>
 
+                {/* Specifications */}
+                <Typography variant="h6" sx={{ mt: 2 }}>Thông số kỹ thuật</Typography>
+                {specifications.map((spec, index) => (
+                    <Box key={index} sx={{ display: 'grid', gap: 2, p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <TextField
+                                label="Tiêu đề"
+                                value={spec.title}
+                                onChange={(e) => handleSpecificationChange(index, 'title', e.target.value)}
+                                placeholder="Model, Màu sắc, Dung tích, ..."
+                                sx={{ flex: 1 }}
+                            />
+                            <TextField
+                                label="Thứ tự"
+                                type="number"
+                                value={spec.order}
+                                onChange={(e) => handleSpecificationChange(index, 'order', Number(e.target.value))}
+                                sx={{ width: 100 }}
+                            />
+                            <IconButton onClick={() => removeSpecification(index)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Box>
+                        <TextField
+                            label="Nội dung"
+                            value={spec.content}
+                            onChange={(e) => handleSpecificationChange(index, 'content', e.target.value)}
+                            placeholder="LTC-20L, Bạc kim loại, 20L, ..."
+                        />
+                    </Box>
+                ))}
+                <Button startIcon={<AddIcon />} onClick={addSpecification} variant="outlined">
+                    Thêm thông số kỹ thuật
+                </Button>
+
                 {/* Additional Info */}
                 <Typography variant="h6" sx={{ mt: 2 }}>Thông tin bổ sung</Typography>
                 {additionalInfo.map((info, index) => (
@@ -257,14 +428,17 @@ const ProductEditPage: React.FC = () => {
                                 <DeleteIcon />
                             </IconButton>
                         </Box>
-                        <TextField
-                            label="Nội dung"
-                            value={info.content}
-                            onChange={(e) => handleAdditionalInfoChange(index, 'content', e.target.value)}
-                            multiline
-                            minRows={3}
-                            placeholder="Nhập nội dung chi tiết..."
-                        />
+                        <Box>
+                            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                                Nội dung
+                            </Typography>
+                            <RichTextEditor
+                                value={info.content}
+                                onChange={(value) => handleAdditionalInfoChange(index, 'content', value)}
+                                placeholder="Nhập nội dung chi tiết..."
+                                minHeight={120}
+                            />
+                        </Box>
                     </Box>
                 ))}
                 <Button startIcon={<AddIcon />} onClick={addAdditionalInfo} variant="outlined">
