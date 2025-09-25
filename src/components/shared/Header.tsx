@@ -443,15 +443,15 @@ const Header: React.FC = () => {
                                 Liên hệ
                             </Link>
 
-                            {/* Categories from API - All Categories with Dropdown for Products */}
-                            {!loading && categories.map((category) => {
+                            {/* Categories from API - Only Parent Categories with Child Categories and Products */}
+                            {!loading && getParentCategories().map((category) => {
                                 const childCategories = getChildCategories(category._id);
                                 const isOpen = openMobileCategories.includes(category._id);
                                 const hasChildren = childCategories.length > 0;
                                 const hasProducts = categoryProducts[category.slug]?.length > 0;
 
                                 // Show dropdown arrow if has children OR if we want to show products
-                                const showDropdown = hasChildren || true; // Always show dropdown for now
+                                const showDropdown = hasChildren || true; // Always show dropdown for parent categories
 
                                 return (
                                     <Box key={category._id}>

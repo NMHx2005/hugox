@@ -209,6 +209,7 @@ const ProductCreatePage: React.FC = () => {
                         onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
                         placeholder="Nhập mô tả chi tiết sản phẩm..."
                         minHeight={200}
+                        onImageUpload={upload_product_image}
                     />
                 </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
@@ -404,6 +405,7 @@ const ProductCreatePage: React.FC = () => {
                                 onChange={(value) => handleAdditionalInfoChange(index, 'content', value)}
                                 placeholder="Nhập nội dung chi tiết..."
                                 minHeight={120}
+                                onImageUpload={upload_product_image}
                             />
                         </Box>
                     </Box>

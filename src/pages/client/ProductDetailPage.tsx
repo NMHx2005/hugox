@@ -524,7 +524,6 @@ const ProductDetailPage: React.FC = () => {
                                         alt={relatedProduct.name}
                                         sx={{
                                             width: '100%',
-                                            height: 150,
                                             objectFit: 'cover',
                                             transition: 'transform 0.3s ease',
                                             '&:hover': {

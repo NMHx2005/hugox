@@ -232,13 +232,13 @@ const Header = () => {
                                         textDecoration: 'none',
                                         color: '#222',
                                         fontSize: '14px'
-                                    }, onClick: () => setIsMobileMenuOpen(false), children: "Li\u00EAn h\u1EC7" }), !loading && categories.map((category) => {
+                                    }, onClick: () => setIsMobileMenuOpen(false), children: "Li\u00EAn h\u1EC7" }), !loading && getParentCategories().map((category) => {
                                     const childCategories = getChildCategories(category._id);
                                     const isOpen = openMobileCategories.includes(category._id);
                                     const hasChildren = childCategories.length > 0;
                                     const hasProducts = categoryProducts[category.slug]?.length > 0;
                                     // Show dropdown arrow if has children OR if we want to show products
-                                    const showDropdown = hasChildren || true; // Always show dropdown for now
+                                    const showDropdown = hasChildren || true; // Always show dropdown for parent categories
                                     return (_jsxs(Box, { children: [_jsxs(Box, { sx: {
                                                     display: 'flex',
                                                     alignItems: 'center',
