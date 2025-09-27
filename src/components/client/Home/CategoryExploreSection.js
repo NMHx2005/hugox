@@ -49,7 +49,7 @@ const ProductCard = ({ product }) => {
                             marginBottom: { xs: '8px', sm: '10px' },
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px'
-                        }, children: product.category.name }), _jsxs(Box, { sx: { marginBottom: { xs: '8px', sm: '10px' } }, children: [product.originalPrice && (_jsx(Typography, { sx: {
+                        }, children: product.category?.name || 'Chưa phân loại' }), _jsxs(Box, { sx: { marginBottom: { xs: '8px', sm: '10px' } }, children: [product.originalPrice && (_jsx(Typography, { sx: {
                                     fontSize: { xs: '12px', sm: '13px' },
                                     color: '#999',
                                     textDecoration: 'line-through',

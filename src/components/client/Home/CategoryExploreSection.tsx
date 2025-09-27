@@ -82,7 +82,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         letterSpacing: '0.5px'
                     }}
                 >
-                    {product.category.name}
+                    {product.category?.name || 'Chưa phân loại'}
                 </Typography>
 
                 {/* Price */}

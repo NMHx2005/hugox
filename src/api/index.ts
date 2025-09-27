@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // In Vite, environment variables are exposed via import.meta.env
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const baseURL = import.meta.env.VITE_API_URL ||
+    (import.meta.env.PROD ? 'https://hugox-api.your-domain.com/api' : 'http://localhost:3000/api');
 
 const api = axios.create({
     baseURL,
