@@ -61,6 +61,8 @@ const CategoryFormPage = () => {
         }).catch(() => setParentOptions([]));
     }, [id]);
     const handleChange = (e) => {
+        if (!e || !e.target)
+            return;
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     };

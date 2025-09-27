@@ -55,6 +55,8 @@ const ProductCreatePage = () => {
         get_admin_categories().then((list) => setCategories(list)).catch(() => setCategories([]));
     }, []);
     const handleChange = (e) => {
+        if (!e || !e.target)
+            return;
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     };

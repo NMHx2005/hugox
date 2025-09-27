@@ -43,6 +43,8 @@ const GeneralSettingsPage = () => {
         }
     };
     const handleChange = (field) => (e) => {
+        if (!e || !e.target)
+            return;
         setSettings(prev => ({ ...prev, [field]: e.target.value }));
     };
     const handleSave = async () => {

@@ -221,7 +221,6 @@ const ProductDetailPage = () => {
                                     cursor: 'pointer'
                                 }, onClick: () => window.location.href = `/products/${relatedProduct.slug}`, children: [_jsx(Box, { component: "img", src: relatedProduct.images?.[0] || '/placeholder-product.jpg', alt: relatedProduct.name, sx: {
                                             width: '100%',
-                                            height: 150,
                                             objectFit: 'cover',
                                             transition: 'transform 0.3s ease',
                                             '&:hover': {

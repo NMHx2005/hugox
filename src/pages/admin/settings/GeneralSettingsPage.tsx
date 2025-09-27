@@ -46,6 +46,7 @@ const GeneralSettingsPage: React.FC = () => {
     };
 
     const handleChange = (field: keyof GeneralSettings) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e || !e.target) return;
         setSettings(prev => ({ ...prev, [field]: e.target.value }));
     };
 

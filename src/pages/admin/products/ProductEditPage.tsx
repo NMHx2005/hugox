@@ -108,6 +108,7 @@ const ProductEditPage: React.FC = () => {
     }, [id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e || !e.target) return;
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     };
